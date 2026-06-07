@@ -97,10 +97,10 @@
   /* hide scrollbar on horizontal team strip */
   .no-bar::-webkit-scrollbar { display:none; } .no-bar { -ms-overflow-style:none; scrollbar-width:none; }
   /* detail popups */
-  .modal{position:fixed;inset:0;z-index:80;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
-  .modal.open{display:flex}
+  .modal{position:fixed;inset:0;z-index:80;display:none;padding:40px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .modal.open{display:block}
   .modal-bg{position:fixed;inset:0;background:rgba(5,6,10,.8);backdrop-filter:blur(8px)}
-  .modal-panel{position:relative;z-index:1;width:100%;max-width:1020px;margin:auto;background:#0b0e14;border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:54px 32px 40px;box-shadow:0 40px 120px rgba(0,0,0,.6)}
+  .modal-panel{position:relative;z-index:1;width:100%;max-width:1020px;margin:0 auto;background:#0b0e14;border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:54px 32px 40px;box-shadow:0 40px 120px rgba(0,0,0,.6)}
   .modal-x{position:absolute;top:16px;right:22px;font-size:36px;line-height:1;color:rgba(255,255,255,.55);background:none;border:none;cursor:pointer;transition:color .2s}
   .modal-x:hover{color:#fff}
 </style>
@@ -509,6 +509,9 @@ LANG.km.stats = [ {n:7,s:"",l:"អ្នកជំនាញ"}, {n:3,s:"",l:"ភ�
 LANG.en.team_cta = "Meet the 7-agent team →";
 LANG.id.team_cta = "Temui tim 7 agen →";
 LANG.km.team_cta = "ស្គាល់ក្រុមភ្នាក់ងារ ៧នាក់ →";
+LANG.en.services.see = "See details"; LANG.en.services.more = "things included";
+LANG.id.services.see = "Lihat detail"; LANG.id.services.more = "hal termasuk";
+LANG.km.services.see = "មើលលម្អិត"; LANG.km.services.more = "មុខងាររួមបញ្ចូល";
 LANG.en.why = { h:"Anyone can use AI. We use it like experts.", sub:"ChatGPT and template builders give you generic output. We give you a real team, real design, and real results.", items:[
   {t:"Brand-grade, not template", d:"Built on the design systems behind the world's biggest brands. Never generic AI slop."},
   {t:"Experts, not prompts", d:"A 7-specialist team who know what actually ranks, converts, and sells. You don't lift a finger or write a single prompt."},
@@ -610,22 +613,19 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
   </div>
 </section>
 
-<!-- TEAM (teaser → click opens full popup) -->
-<section id="team" class="px-6 md:px-12 py-16 max-w-6xl mx-auto text-center">
-  <h2 id="teamH" class="display text-4xl md:text-5xl font-bold tracking-tight mb-3"></h2>
-  <p id="teamSub" class="text-white/50 mb-10 max-w-2xl mx-auto"></p>
-  <div id="teamAvatars" class="flex justify-center flex-wrap gap-4 mb-9"></div>
-  <button id="teamOpen" type="button" data-magnetic class="btn-shine bg-white text-[#0c1117] px-7 py-3.5 rounded-full text-sm font-bold hover:bg-[#eab308] transition"></button>
+<!-- TEAM (original grid — shows all 7, no scroll) -->
+<section id="team" class="px-6 md:px-12 py-16 max-w-6xl mx-auto">
+  <h2 id="teamH" class="display text-4xl md:text-5xl font-bold tracking-tight text-center mb-3"></h2>
+  <p id="teamSub" class="text-white/50 text-center mb-14 max-w-2xl mx-auto"></p>
+  <div id="agentGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 </section>
 
-<!-- TEAM MODAL -->
-<div id="teamModal" class="modal" aria-hidden="true">
+<!-- DETAIL MODAL (reused: service details + more) -->
+<div id="detailModal" class="modal" aria-hidden="true">
   <div class="modal-bg" data-close></div>
   <div class="modal-panel">
     <button type="button" data-close class="modal-x" aria-label="Close">&times;</button>
-    <h3 id="teamModalH" class="display text-3xl md:text-4xl font-bold tracking-tight text-center mb-2"></h3>
-    <p id="teamModalSub" class="text-white/50 text-center mb-10"></p>
-    <div id="agentGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <div id="detailBody"></div>
   </div>
 </div>
 
@@ -761,11 +761,13 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
       '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/></svg>'
     ];
     $('svcGrid').innerHTML = t.services.groups.map((g, idx) => `
-      <div class="pop rounded-2xl p-7 bg-[#0f1115] border border-white/5 hover:border-white/15 transition-all duration-200 hover:shadow-2xl hover:shadow-black/40" style="--d:${(idx*0.06).toFixed(2)}s">
+      <button type="button" data-svc="${idx}" class="svc-tile pop text-left w-full rounded-2xl p-7 bg-[#0f1115] border border-white/5 hover:border-[#eab308]/40 transition-all duration-200 hover:shadow-2xl hover:shadow-black/40 group" style="--d:${(idx*0.06).toFixed(2)}s">
         <div class="text-[#eab308] mb-5">${svcIcons[idx] || ''}</div>
-        <h3 class="display text-lg font-semibold mb-4">${g.title}</h3>
-        <ul class="space-y-3 text-sm text-white/60">${g.items.map(i => `<li class="flex gap-2.5"><svg class="w-4 h-4 mt-0.5 shrink-0 text-[#34d399]" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg><span>${i}</span></li>`).join('')}</ul>
-      </div>`).join('');
+        <h3 class="display text-lg font-semibold mb-2">${g.title}</h3>
+        <p class="text-sm text-white/45 mb-4">${g.items.length} ${t.services.more}</p>
+        <span class="inline-flex items-center gap-1 text-[#eab308] text-sm font-semibold group-hover:gap-2 transition-all">${t.services.see} →</span>
+      </button>`).join('');
+    window.__svc = t.services.groups;
 
     $('priceH').textContent = t.pricing.h;
     $('priceSub').textContent = t.pricing.sub;
@@ -906,15 +908,6 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
         <p class="text-sm text-white/55 leading-relaxed">${t.roles[i].d}</p>
       </div>`).join('');
 
-    $('teamAvatars').innerHTML = VISUAL.agents.map(a => `
-      <div class="slot rounded-full glow w-16 h-16 md:w-[76px] md:h-[76px]" style="--c:${a.c}" title="${a.name}">
-        <img class="charimg" src="${a.img}" alt="${a.name}" onerror="this.style.display='none'">
-        <div class="ph text-2xl">${a.emoji}</div>
-      </div>`).join('');
-    $('teamOpen').textContent = t.team_cta;
-    $('teamModalH').textContent = t.team_h;
-    $('teamModalSub').textContent = t.team_sub;
-
     $('stepsGrid').innerHTML = t.steps.map((s,i) => `
       <div><div class="display text-4xl font-bold text-[#eab308] mb-3">${i+1}</div>
       <h3 class="display font-semibold mb-2">${s.t}</h3>
@@ -1041,6 +1034,13 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
   const closeModals = () => { document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open')); document.body.style.overflow=''; };
   const to=document.getElementById('teamOpen'); if(to) to.addEventListener('click',()=>openModal('teamModal'));
   document.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click', closeModals));
+  const detailBody=document.getElementById('detailBody'), svcGridEl=document.getElementById('svcGrid');
+  if (svcGridEl && detailBody) svcGridEl.addEventListener('click', e=>{
+    const tile=e.target.closest('.svc-tile'); if(!tile) return;
+    const g=(window.__svc||[])[+tile.dataset.svc]; if(!g) return;
+    detailBody.innerHTML='<h3 class="display text-3xl md:text-4xl font-bold tracking-tight text-center mb-8">'+g.title+'</h3><ul class="space-y-4 text-white/70 max-w-xl mx-auto">'+g.items.map(function(i){return '<li class="flex gap-3"><svg class="w-5 h-5 mt-0.5 shrink-0 text-[#34d399]" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg><span>'+i+'</span></li>';}).join('')+'</ul>';
+    openModal('detailModal');
+  });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModals(); });
 })();
 </script>
