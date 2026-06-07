@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Iron Pulse — Fitness</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  .display { font-family:'Anton',sans-serif; text-transform:uppercase; line-height:0.9; letter-spacing:0.01em; }
+  html { scroll-behavior:smooth; }
+  .photo { background:#111; } .photo img { width:100%; height:100%; object-fit:cover; }
+  .reveal { opacity:0; transform:translateY(24px); transition:.6s ease; } .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body class="bg-white text-[#111111]">
+<!-- ↓ EDIT HERE: classes, membership, prices ↓ -->
+<script>
+const CONTENT = {
+  name:"Iron Pulse", tagline:"Train hard. Feel unstoppable.",
+  heroImg:"https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920&auto=format&fit=crop",
+  whatsapp:"+855 12 000 000", address:"St. 271, Phnom Penh", hours:"Mon – Sat · 6am – 10pm",
+  classes:[["HIIT Burn","Mon / Wed / Fri · 7am"],["Strength 101","Tue / Thu · 6pm"],["Spin","Daily · 8am"],["Yoga Flow","Sat / Sun · 9am"]],
+  plans:[["Day Pass","$5","/day",["Full gym access","All facilities"]],["Monthly","$39","/mo",["Unlimited gym","All classes","1 PT session"]],["Annual","$390","/yr",["Everything monthly","2 months free","4 PT sessions"]]]
+};
+</script>
+
+<header class="fixed w-full z-50 top-0 px-6 md:px-12 h-16 flex items-center justify-between text-white mix-blend-difference">
+  <div class="display text-2xl" id="nm"></div>
+  <a id="navJoin" href="#plans" class="bg-white text-black text-[13px] font-semibold px-5 py-2 rounded-full">Join</a>
+</header>
+
+<!-- HERO -->
+<section class="relative h-screen photo flex items-end">
+  <img id="hero" onerror="this.style.display='none'" />
+  <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30"></div>
+  <div class="relative z-10 px-6 md:px-12 pb-16 text-white max-w-4xl">
+    <h1 class="display text-7xl md:text-9xl mb-6" id="hn"></h1>
+    <a href="#plans" class="inline-block bg-white text-black font-semibold px-8 py-4 rounded-full hover:bg-[#f5f5f5] transition">Start training</a>
+  </div>
+</section>
+
+<!-- CLASSES -->
+<section class="px-6 md:px-12 py-24 max-w-5xl mx-auto">
+  <h2 class="display text-5xl md:text-7xl mb-12 reveal">The Classes</h2>
+  <div id="classes" class="divide-y divide-[#cacacb] border-y border-[#cacacb]"></div>
+</section>
+
+<!-- PLANS -->
+<section id="plans" class="px-6 md:px-12 py-24 bg-[#111] text-white">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="display text-5xl md:text-7xl mb-12">Membership</h2>
+    <div id="planGrid" class="grid md:grid-cols-3 gap-5"></div>
+  </div>
+</section>
+
+<!-- VISIT -->
+<section class="px-6 md:px-12 py-20 text-center">
+  <h2 class="display text-4xl md:text-6xl mb-4">Come get strong</h2>
+  <p id="info" class="text-[#707072] mb-8"></p>
+  <a id="join" href="#" class="inline-block bg-[#111] text-white font-semibold px-9 py-4 rounded-full hover:opacity-80 transition"></a>
+</section>
+
+<footer class="bg-[#111] text-white/50 px-6 py-8 text-center text-sm"><span class="display text-white text-lg" id="fn"></span> · Built by Ficworks</footer>
+
+<script>
+  const wa=CONTENT.whatsapp.replace(/[^0-9]/g,''), $=id=>document.getElementById(id);
+  const join=p=>"https://wa.me/"+wa+"?text="+encodeURIComponent("Hi "+CONTENT.name+"! I'd like to join: "+(p||"membership"));
+  nm.textContent=fn.textContent=hn.textContent=CONTENT.name; info.textContent=CONTENT.address+" · "+CONTENT.hours; hero.src=CONTENT.heroImg;
+  navJoin.href=join(""); join.href=join(""); join.textContent="Join on WhatsApp";
+  $('classes').innerHTML=CONTENT.classes.map(c=>`<div class="flex items-center justify-between py-5"><span class="display text-2xl md:text-3xl">${c[0]}</span><span class="text-[#707072] text-sm md:text-base">${c[1]}</span></div>`).join('');
+  $('planGrid').innerHTML=CONTENT.plans.map((p,i)=>`<div class="rounded-3xl p-7 ${i==1?'bg-white text-black':'bg-white/[0.06] text-white border border-white/10'} flex flex-col"><div class="display text-2xl mb-3">${p[0]}</div><div class="mb-5"><span class="display text-5xl">${p[1]}</span><span class="${i==1?'text-black/50':'text-white/50'}">${p[2]}</span></div><ul class="space-y-2 text-sm ${i==1?'text-black/70':'text-white/70'} mb-6 flex-1">${p[3].map(f=>`<li>— ${f}</li>`).join('')}</ul><a href="${join(p[0])}" target="_blank" class="block text-center font-semibold py-3 rounded-full ${i==1?'bg-black text-white':'bg-white text-black'} hover:opacity-80 transition">Join</a></div>`).join('');
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.2});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

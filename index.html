@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ficworks — Your AI Marketing Team</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='88'>🚀</text></svg>" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&family=Noto+Sans+Khmer:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; letter-spacing: -0.01em; background-image: radial-gradient(55rem 28rem at 50% -8%, rgba(234,179,8,0.06), transparent 70%), radial-gradient(rgba(255,255,255,0.022) 1px, transparent 1px); background-size: auto, 24px 24px; background-attachment: fixed; }
+  .display { font-family: 'Space Grotesk', sans-serif; }
+  :lang(km), html[lang="km"] body, html[lang="km"] .display { font-family: 'Noto Sans Khmer', 'Inter', sans-serif; }
+  html { scroll-behavior: smooth; }
+  section[id] { scroll-margin-top: 84px; }
+  .slot { position: relative; overflow: hidden; background: radial-gradient(circle at 50% 35%, var(--c)44, #0c1117 70%); }
+  .slot img { width:100%; height:100%; object-fit:cover; position:relative; z-index:2; }
+  .slot .ph { position:absolute; inset:0; z-index:1; display:flex; align-items:center; justify-content:center; font-size:3rem; }
+  .glow { box-shadow: 0 0 50px -12px var(--c); }
+  .langbtn { opacity:.5 } .langbtn.active { opacity:1 }
+  @keyframes bob {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    20% { transform: translateY(-9px) rotate(-3.5deg); }
+    45% { transform: translateY(-1px) rotate(3.5deg); }
+    65% { transform: translateY(-7px) rotate(-2deg); }
+    85% { transform: translateY(0) rotate(2deg); }
+  }
+  .charimg { animation: bob var(--dur,4.5s) ease-in-out infinite; animation-delay: var(--delay,0s); will-change: transform; transform-origin: 50% 92%; }
+  .slot:hover .charimg { animation-duration: 1.1s; }
+  /* gentle ken-burns drift only — no watermark crop needed (Veo, clean source) */
+  @keyframes drift { 0%{ transform: scale(1.0) } 100%{ transform: scale(1.05) translateY(-1%) } }
+  .heroimg { /* no CSS zoom — the Veo video already moves; avoids heavy continuous compositing */ }
+  @media (prefers-reduced-motion: reduce) { .charimg, .heroimg { animation: none } }
+  /* "greeting" entrance — characters spring up to say hi as you scroll to them */
+  .agent-card { opacity: 0; transform: translateY(30px) scale(.9); }
+  .agent-card.in { animation: greet .7s cubic-bezier(.2,.85,.3,1.5) forwards; animation-delay: var(--d,0s); }
+  .pop { opacity:0; transform: translateY(28px) scale(.96); }
+  .pop.in { animation: greet .7s cubic-bezier(.2,.85,.3,1.5) forwards; animation-delay: var(--d,0s); }
+  @keyframes greet { 0%{ opacity:0; transform: translateY(30px) scale(.9) } 55%{ opacity:1 } 100%{ opacity:1; transform: translateY(0) scale(1) } }
+  @media (prefers-reduced-motion: reduce) { .agent-card, .pop { opacity:1; transform:none } .agent-card.in, .pop.in { animation:none } }
+</style>
+</head>
+<body class="bg-[#08090c] text-[#f7f8f8]">
+
+<!-- ============================================================= -->
+<!--  FIXED VISUALS (colours, emojis, images) — not language       -->
+<!-- ============================================================= -->
+<script>
+const AGENCY_NAME = "Ficworks";
+// Contact channels — WhatsApp for most markets, Telegram for Cambodia (Khmer).
+const CONTACT = {
+  whatsapp: "601127616188",  // Ficworks WhatsApp business number
+  telegram: "ficworks"       // Ficworks Telegram username (without the @)
+};
+const VISUAL = {
+  agents: [
+    { name: "Blog Writer",      img: "characters/blog-writer.png",      emoji: "🪶", c: "#f97316" },
+    { name: "Researcher",       img: "characters/researcher.png",       emoji: "🔍", c: "#22d3ee" },
+    { name: "Analyst",          img: "characters/analyst.png",          emoji: "📊", c: "#a3e635" },
+    { name: "Spy",              img: "characters/spy.png",              emoji: "🔭", c: "#34d399" },
+    { name: "Devil's Advocate", img: "characters/devils-advocate.png",  emoji: "😈", c: "#f43f5e" },
+    { name: "Marketer",         img: "characters/marketer.png",         emoji: "📣", c: "#eab308" },
+    { name: "Architect",        img: "characters/architect.png",        emoji: "📐", c: "#a78bfa" }
+  ],
+  problemEmojis: [
+    '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m3-9.2A2.4 2.4 0 0 0 12.6 6.5H11a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4h-1.6A2.4 2.4 0 0 1 9 12.8"/></svg>',
+    '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m21 21-4.3-4.3"/></svg>',
+    '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10.5h8M8 14h5M4 19l2.5-2.5H18a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12z"/></svg>',
+    '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.4 5.2A9 9 0 0 1 21 12a9 9 0 0 1-1.9 2.9M6.6 6.6A9 9 0 0 0 3 12a9 9 0 0 0 9 5"/></svg>',
+    '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 21V8l8-5 8 5v13M9 21v-6h6v6"/></svg>',
+    '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><rect x="5" y="11" width="14" height="10" rx="2"/><path stroke-linecap="round" d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
+  ],
+  caseLink: "hotel-demo.html"
+};
+const EXAMPLES = [
+  { key:"hotel",  name:"Amara Ubud", link:"hotel-demo.html", img:"https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop" },
+  { key:"cafe",   name:"Kopi Senja",        link:"cafe-demo.html",        img:"https://images.unsplash.com/photo-1447933601403-0c6688de566e?q=80&w=800&auto=format&fit=crop" },
+  { key:"salon",  name:"Velour",            link:"salon-demo.html",       img:"https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800&auto=format&fit=crop" },
+  { key:"shop",   name:"Marble & Oak",      link:"retail-demo.html",      img:"https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=800&auto=format&fit=crop" },
+  { key:"gym",    name:"Iron Pulse",        link:"gym-demo.html",         img:"https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop" },
+  { key:"clinic", name:"BrightSmile",       link:"clinic-demo.html",      img:"https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=800&auto=format&fit=crop" }
+];
+
+// ============================================================= //
+//  LANGUAGES: English · Bahasa Indonesia · Khmer                //
+//  To add one, copy a block and translate — this is exactly     //
+//  what the Blog Writer agent fills in; you just approve it.     //
+// ============================================================= //
+const LANG = {
+  en: {
+    label: "EN",
+    cta_nav: "Get started",
+    hero_eyebrow: "An AI marketing department for small businesses",
+    hero_h: "A website that brings you customers.",
+    hero_sub: "Seven specialists who design your website, write your content, run your ads, and watch your competitors — for the price of one freelancer.",
+    prob_eyebrow: "Sound familiar?",
+    prob_h: "The problems quietly costing you money",
+    prob_sub: "If two or three of these feel like your every day, that's exactly what we fix.",
+    problems: [
+      { t: "Every sale pays a tax", d: "Bookings go through Agoda, GrabFood and the rest — who skim 15–25% off the top, forever." },
+      { t: "Invisible on Google", d: "People search your name and find scraps — so they book the competitor that looks legit." },
+      { t: "Same questions, all day", d: "“Price? Available? Where are you? Got parking?” Your staff retype it on WhatsApp 50× a day." },
+      { t: "Your best feature is hidden", d: "The thing that actually sells you — the pool, the rooms, the food — nobody sees it until they arrive." },
+      { t: "You look smaller than you are", d: "No website reads as less trustworthy than a competitor half your size that has one." },
+      { t: "You don't own your customers", d: "Fully dependent on third-party apps. No direct list, no easy way to bring people back." }
+    ],
+    prob_foot: "👇 Here's the team that makes every one of these go away.",
+    gap_eyebrow: "What you're missing out on",
+    gap_h: "Every day you wait, this is the gap",
+    gap_sub: "Same business, two different realities. The difference is a proper website working for you.",
+    without_h: "Without a real website",
+    without: [
+      "Apps take 15–25% commission on every booking",
+      "Customers find you by accident — if at all",
+      "Staff answer the same WhatsApp questions all day",
+      "Your best features stay invisible",
+      "You look smaller than competitors who have one",
+      "No customer list — you don't own your audience"
+    ],
+    with_h: "With your AI team",
+    with: [
+      "Direct WhatsApp bookings — keep 100% of the rate",
+      "Show up on Google the moment people search you",
+      "The site answers the FAQs for you, 24/7",
+      "Your pool, rooms and food sell you around the clock",
+      "Look as professional as you actually are",
+      "Your own audience you can bring back again and again"
+    ],
+    gap_foot: "The gap doesn't close on its own. We close it for you — fast.",
+    team_h: "Your team",
+    team_sub: "Seven specialists. One monthly price. Zero hiring.",
+    roles: [
+      { r: "Content & web copy",  d: "Writes pages, blogs and product copy that rank on Google and sell." },
+      { r: "Customers & leads",   d: "Finds your ideal customers and what they actually want to buy." },
+      { r: "SEO & analytics",     d: "Audits your site, fixes what's broken, tracks what's working." },
+      { r: "Competitor intel",    d: "Studies your competitors so you stay one step ahead." },
+      { r: "Conversion review",   d: "Pokes holes in your pages before your customers do — so more of them buy." },
+      { r: "Ads, social & email", d: "Runs the campaigns that bring people in — paid ads, social and email." },
+      { r: "Website design",      d: "Designs and builds the website itself — fast, modern, easy to update." }
+    ],
+    steps: [
+      { t: "We build it", d: "Your website, content and campaigns — set up by the team in days, not months." },
+      { t: "You edit the easy stuff", d: "Change prices, photos and text yourself in a simple dashboard. No code, can't break it." },
+      { t: "The team handles the rest", d: "Need a new page or campaign? Send a request — an agent does it, we approve, it's live." }
+    ],
+    cs_eyebrow: "Case study",
+    cs_name: "Amara Ubud",
+    cs_line: "A family hotel in Bengkayang with no website — now a booking-ready site in days.",
+    cs_link: "See the live demo →",
+    final_h: "Ready to get your business online — properly?",
+    final_sub: "Tell us about your business. We'll show you a demo of your new site before you pay a cent.",
+    final_btn: "Message us on WhatsApp",
+    footer: "Websites & marketing for small businesses — anywhere in the world"
+  },
+
+  id: {
+    label: "ID",
+    cta_nav: "Mulai sekarang",
+    hero_eyebrow: "Departemen pemasaran AI untuk usaha kecil",
+    hero_h: "Website yang mendatangkan pelanggan.",
+    hero_sub: "Tujuh spesialis yang mendesain website Anda, menulis konten, menjalankan iklan, dan mengawasi pesaing Anda — dengan harga satu freelancer.",
+    prob_eyebrow: "Terdengar familiar?",
+    prob_h: "Masalah yang diam-diam menggerus pendapatan Anda",
+    prob_sub: "Kalau dua atau tiga dari ini terasa seperti keseharian Anda, itulah yang kami selesaikan.",
+    problems: [
+      { t: "Setiap penjualan kena potongan", d: "Pemesanan lewat Agoda, GrabFood dan lainnya — yang ambil 15–25% setiap kali, selamanya." },
+      { t: "Tidak terlihat di Google", d: "Orang mencari nama Anda dan hanya menemukan potongan info — jadi mereka pesan pesaing yang terlihat meyakinkan." },
+      { t: "Pertanyaan yang sama, seharian", d: "“Harga? Ada kamar? Di mana? Ada parkir?” Staf Anda mengetik ulang di WhatsApp 50× sehari." },
+      { t: "Keunggulan terbaik Anda tersembunyi", d: "Hal yang sebenarnya menjual Anda — kolam, kamar, makanan — tidak ada yang lihat sampai mereka tiba." },
+      { t: "Anda terlihat lebih kecil", d: "Tanpa website, Anda terkesan kurang terpercaya dibanding pesaing separuh ukuran Anda yang punya website." },
+      { t: "Anda tidak memiliki pelanggan Anda", d: "Sepenuhnya bergantung pada aplikasi pihak ketiga. Tidak ada daftar sendiri, sulit membawa pelanggan kembali." }
+    ],
+    prob_foot: "👇 Inilah tim yang menghilangkan setiap masalah ini.",
+    gap_eyebrow: "Apa yang Anda lewatkan",
+    gap_h: "Setiap hari Anda menunggu, inilah selisihnya",
+    gap_sub: "Bisnis yang sama, dua kenyataan berbeda. Bedanya adalah website yang benar bekerja untuk Anda.",
+    without_h: "Tanpa website sungguhan",
+    without: [
+      "Aplikasi ambil komisi 15–25% setiap pemesanan",
+      "Pelanggan menemukan Anda secara kebetulan — kalau pun ada",
+      "Staf menjawab pertanyaan WhatsApp yang sama seharian",
+      "Keunggulan terbaik Anda tetap tak terlihat",
+      "Anda terlihat lebih kecil dari pesaing yang punya website",
+      "Tidak ada daftar pelanggan — Anda tidak memiliki audiens Anda"
+    ],
+    with_h: "Dengan tim AI Anda",
+    with: [
+      "Pemesanan langsung lewat WhatsApp — simpan 100% tarifnya",
+      "Muncul di Google begitu orang mencari Anda",
+      "Website menjawab pertanyaan umum untuk Anda, 24/7",
+      "Kolam, kamar, dan makanan Anda menjual sepanjang waktu",
+      "Terlihat seprofesional kenyataannya",
+      "Audiens Anda sendiri yang bisa Anda datangkan lagi"
+    ],
+    gap_foot: "Selisih ini tidak menutup sendiri. Kami yang menutupnya untuk Anda — cepat.",
+    team_h: "Tim Anda",
+    team_sub: "Tujuh spesialis. Satu harga bulanan. Tanpa rekrut karyawan.",
+    roles: [
+      { r: "Konten & teks web",   d: "Menulis halaman, blog, dan teks produk yang naik peringkat Google dan menjual." },
+      { r: "Pelanggan & prospek", d: "Menemukan pelanggan ideal Anda dan apa yang benar-benar ingin mereka beli." },
+      { r: "SEO & analitik",      d: "Mengaudit situs Anda, memperbaiki yang rusak, melacak yang berhasil." },
+      { r: "Intel pesaing",       d: "Mempelajari pesaing Anda agar Anda selalu selangkah di depan." },
+      { r: "Tinjauan konversi",   d: "Mencari kelemahan halaman Anda sebelum pelanggan — agar lebih banyak yang membeli." },
+      { r: "Iklan, sosial & email", d: "Menjalankan kampanye yang mendatangkan orang — iklan berbayar, sosial, dan email." },
+      { r: "Desain website",      d: "Mendesain dan membangun website-nya — cepat, modern, mudah diperbarui." }
+    ],
+    steps: [
+      { t: "Kami membangun", d: "Website, konten, dan kampanye Anda — disiapkan dalam hitungan hari, bukan bulan." },
+      { t: "Anda edit yang mudah", d: "Ubah harga, foto, dan teks sendiri lewat dashboard sederhana. Tanpa kode, tak bisa rusak." },
+      { t: "Tim menangani sisanya", d: "Perlu halaman atau kampanye baru? Kirim permintaan — agen mengerjakannya, kami menyetujui, langsung tayang." }
+    ],
+    cs_eyebrow: "Studi kasus",
+    cs_name: "Amara Ubud",
+    cs_line: "Hotel keluarga di Bengkayang tanpa website — kini situs siap-pesan dalam hitungan hari.",
+    cs_link: "Lihat demo langsung →",
+    final_h: "Siap membawa bisnis Anda online — dengan benar?",
+    final_sub: "Ceritakan bisnis Anda. Kami tunjukkan demo website baru Anda sebelum Anda bayar sepeser pun.",
+    final_btn: "Hubungi kami di WhatsApp",
+    footer: "Website & pemasaran untuk usaha kecil — di mana saja di dunia"
+  },
+
+  km: {
+    label: "ខ្មែរ",
+    cta_nav: "ចាប់ផ្ដើមឥឡូវនេះ",
+    hero_eyebrow: "ផ្នែកទីផ្សារ AI សម្រាប់អាជីវកម្មតូច",
+    hero_h: "គេហទំព័រដែលនាំអតិថិជនមកឱ្យអ្នក។",
+    hero_sub: "អ្នកជំនាញ៧នាក់ ដែលរចនាគេហទំព័ររបស់អ្នក សរសេរមាតិកា គ្រប់គ្រងការផ្សាយពាណិជ្ជកម្ម និងតាមដានគូប្រកួត — ក្នុងតម្លៃអ្នកធ្វើការឯករាជ្យតែម្នាក់។",
+    prob_eyebrow: "ស្ដាប់ទៅធ្លាប់ដែរឬទេ?",
+    prob_h: "បញ្ហាដែលធ្វើឱ្យអ្នកបាត់បង់ប្រាក់ដោយស្ងាត់ៗ",
+    prob_sub: "បើពីរ ឬបីយ៉ាងនេះ ប្រៀបដូចជារៀងរាល់ថ្ងៃរបស់អ្នក នោះគឺជាអ្វីដែលយើងដោះស្រាយ។",
+    problems: [
+      { t: "រាល់ការលក់ត្រូវបង់កម្រៃ", d: "ការកក់ឆ្លងកាត់ Agoda, GrabFood និងផ្សេងទៀត — ដែលយក ១៥–២៥% រាល់ពេល ជារៀងរហូត។" },
+      { t: "មើលមិនឃើញនៅលើ Google", d: "មនុស្សស្វែងរកឈ្មោះអ្នក តែឃើញព័ត៌មានតិចតួច — ដូច្នេះពួកគេកក់ជាមួយគូប្រកួតដែលមើលទៅគួរឱ្យជឿ។" },
+      { t: "សំណួរដដែលៗ ពេញមួយថ្ងៃ", d: "“តម្លៃ? នៅទំនេរ? នៅឯណា? មានកន្លែងចត?” បុគ្គលិកវាយឆ្លើយឡើងវិញនៅ WhatsApp ៥០ដង/ថ្ងៃ។" },
+      { t: "ចំណុចល្អបំផុតរបស់អ្នកត្រូវលាក់", d: "អ្វីដែលពិតជាលក់បានឱ្យអ្នក — អាងហែលទឹក បន្ទប់ ម្ហូប — គ្មាននរណាឃើញ រហូតពួកគេមកដល់។" },
+      { t: "អ្នកមើលទៅតូចជាងការពិត", d: "ការគ្មានគេហទំព័រ ធ្វើឱ្យមើលទៅគួរឱ្យជឿតិចជាងគូប្រកួតតូចជាងអ្នកដែលមានគេហទំព័រ។" },
+      { t: "អ្នកមិនមែនជាម្ចាស់អតិថិជន", d: "ពឹងផ្អែកទាំងស្រុងលើកម្មវិធីភាគីទីបី។ គ្មានបញ្ជីផ្ទាល់ខ្លួន ពិបាកនាំអតិថិជនត្រឡប់មកវិញ។" }
+    ],
+    prob_foot: "👇 នេះជាក្រុមដែលលុបបំបាត់រាល់បញ្ហាទាំងនេះ។",
+    gap_eyebrow: "អ្វីដែលអ្នកកំពុងខកខាន",
+    gap_h: "រាល់ថ្ងៃដែលអ្នករង់ចាំ នេះជាគម្លាត",
+    gap_sub: "អាជីវកម្មដូចគ្នា តែការពិតពីរផ្សេងគ្នា។ ភាពខុសគ្នាគឺគេហទំព័រត្រឹមត្រូវដែលធ្វើការសម្រាប់អ្នក។",
+    without_h: "ដោយគ្មានគេហទំព័រពិតប្រាកដ",
+    without: [
+      "កម្មវិធីយកកម្រៃ ១៥–២៥% រាល់ការកក់",
+      "អតិថិជនរកឃើញអ្នកដោយចៃដន្យ — បើមាន",
+      "បុគ្គលិកឆ្លើយសំណួរ WhatsApp ដដែលៗពេញមួយថ្ងៃ",
+      "ចំណុចល្អបំផុតរបស់អ្នកនៅតែមើលមិនឃើញ",
+      "អ្នកមើលទៅតូចជាងគូប្រកួតដែលមានគេហទំព័រ",
+      "គ្មានបញ្ជីអតិថិជន — អ្នកមិនមែនជាម្ចាស់ទស្សនិកជន"
+    ],
+    with_h: "ជាមួយក្រុម AI របស់អ្នក",
+    with: [
+      "ការកក់ផ្ទាល់តាម WhatsApp — រក្សាតម្លៃ ១០០%",
+      "បង្ហាញនៅលើ Google ភ្លាមៗពេលមនុស្សស្វែងរកអ្នក",
+      "គេហទំព័រឆ្លើយសំណួរទូទៅជំនួសអ្នក ២៤/៧",
+      "អាងហែលទឹក បន្ទប់ និងម្ហូបរបស់អ្នកលក់បានពេញមួយថ្ងៃ",
+      "មើលទៅមានវិជ្ជាជីវៈដូចការពិត",
+      "ទស្សនិកជនផ្ទាល់ខ្លួនដែលអ្នកអាចនាំត្រឡប់មកវិញម្ដងហើយម្ដងទៀត"
+    ],
+    gap_foot: "គម្លាតនេះមិនបិទដោយខ្លួនឯងទេ។ យើងបិទវាសម្រាប់អ្នក — យ៉ាងលឿន។",
+    team_h: "ក្រុមរបស់អ្នក",
+    team_sub: "អ្នកជំនាញ៧នាក់។ តម្លៃតែមួយក្នុងមួយខែ។ មិនបាច់ជួលបុគ្គលិក។",
+    roles: [
+      { r: "មាតិកា និងអត្ថបទគេហទំព័រ", d: "សរសេរទំព័រ ប្លុក និងអត្ថបទផលិតផល ដែលឡើងចំណាត់ថ្នាក់ Google និងលក់បាន។" },
+      { r: "អតិថិជន និងអ្នកសក្ដានុពល", d: "រកអតិថិជនល្អបំផុតរបស់អ្នក និងអ្វីដែលពួកគេពិតជាចង់ទិញ។" },
+      { r: "SEO និងវិភាគ", d: "ត្រួតពិនិត្យគេហទំព័រ កែអ្វីដែលខូច តាមដានអ្វីដែលដំណើរការ។" },
+      { r: "ស៊ើបការណ៍គូប្រកួត", d: "សិក្សាគូប្រកួត ដើម្បីឱ្យអ្នកនាំមុខមួយជំហានជានិច្ច។" },
+      { r: "ការត្រួតពិនិត្យការបំប្លែង", d: "រកចំណុចខ្សោយនៃទំព័រ មុនអតិថិជន — ដើម្បីឱ្យមនុស្សកាន់តែច្រើនទិញ។" },
+      { r: "ការផ្សាយ សង្គម និងអ៊ីមែល", d: "ដំណើរការយុទ្ធនាការនាំមនុស្សចូល — ការផ្សាយបង់ប្រាក់ សង្គម និងអ៊ីមែល។" },
+      { r: "ការរចនាគេហទំព័រ", d: "រចនា និងសាងសង់គេហទំព័រ — លឿន ទំនើប ងាយធ្វើបច្ចុប្បន្នភាព។" }
+    ],
+    steps: [
+      { t: "យើងសាងសង់", d: "គេហទំព័រ មាតិកា និងយុទ្ធនាការរបស់អ្នក — រៀបចំក្នុងរយៈពេលប៉ុន្មានថ្ងៃ មិនមែនខែ។" },
+      { t: "អ្នកកែតម្រូវរបស់ងាយៗ", d: "ប្ដូរតម្លៃ រូបភាព និងអត្ថបទដោយខ្លួនឯងក្នុង dashboard ងាយស្រួល។ គ្មានកូដ មិនអាចខូច។" },
+      { t: "ក្រុមដោះស្រាយផ្នែកដែលនៅសល់", d: "ត្រូវការទំព័រ ឬយុទ្ធនាការថ្មី? ផ្ញើសំណើ — ភ្នាក់ងារធ្វើ យើងអនុម័ត រួចវាដំណើរការ។" }
+    ],
+    cs_eyebrow: "ករណីសិក្សា",
+    cs_name: "Amara Ubud",
+    cs_line: "សណ្ឋាគារគ្រួសារនៅ Bengkayang ដោយគ្មានគេហទំព័រ — ឥឡូវនេះមានគេហទំព័រត្រៀមកក់ក្នុងរយៈពេលប៉ុន្មានថ្ងៃ។",
+    cs_link: "មើលគំរូផ្ទាល់ →",
+    final_h: "ត្រៀមនាំអាជីវកម្មរបស់អ្នកឡើងអនឡាញ — ឱ្យបានត្រឹមត្រូវ?",
+    final_sub: "ប្រាប់យើងអំពីអាជីវកម្មរបស់អ្នក។ យើងនឹងបង្ហាញគំរូគេហទំព័រថ្មីរបស់អ្នក មុនពេលអ្នកបង់ប្រាក់សូម្បីមួយរៀល។",
+    final_btn: "ផ្ញើសារមកយើងតាម Telegram",
+    footer: "គេហទំព័រ និងទីផ្សារសម្រាប់អាជីវកម្មតូច — នៅគ្រប់ទីកន្លែងលើពិភពលោក"
+  }
+};
+
+// ===== Services / Pricing / FAQ content (extends LANG) — draft prices, refine after competitor research =====
+LANG.en.nav = { services:"Services", team:"Team", pricing:"Pricing" };
+LANG.en.services = { h:"Everything we can do for you", sub:"One team — your whole online presence and growth, handled.", groups:[
+  { icon:"🌐", title:"Get online", items:["A professional website","Digital menu + QR code","Online booking, WhatsApp & Telegram ordering","Fast & mobile-ready"] },
+  { icon:"🔍", title:"Get found", items:["SEO to rank on Google","Blogs & content that sell","Google Business Profile setup"] },
+  { icon:"📣", title:"Get customers", items:["Facebook & Instagram ads","Social media content","Promo posters & graphics","Email, WhatsApp & Telegram campaigns"] },
+  { icon:"🧠", title:"Get smarter", items:["Competitor analysis","Growth audit — find what's losing you money","Pricing & packaging advice","Brand strategy for new businesses"] } ]};
+LANG.en.pricing = { h:"Simple, honest pricing", sub:"One team. One monthly price. Cancel anytime.",
+  anchor:"Agencies charge $1,000–5,000/mo. Ficworks gives you the same team — for a fraction.",
+  monthly:"Monthly", annual:"Annual", save:"2 months free", popular:"Most popular", perMo:"/mo",
+  setupPrefix:"+ one-time setup", setupWaived:"Setup fee waived 🎉",
+  customPrice:"Custom", cta:"Get started", customCta:"Let's talk",
+  guarantee:"✓ Free demo before you pay   ✓ Cancel anytime   ✓ Setup waived on annual plans",
+  note:"Prices in USD · drafts — finalized after local market research.",
+  tiers:[
+    {name:"Starter", tagline:"Get online, properly.", mo:"$29", yr:"$24", setupFee:"$149", features:["1-page professional website","Hosting + SSL included","Edit your content yourself","WhatsApp / Telegram bookings","2 content updates / month"]},
+    {name:"Growth", tagline:"Get found and grow.", mo:"$79", yr:"$66", setupFee:"$199", popular:true, features:["Everything in Starter","Multi-page website","4 social posters / month","1 blog post / month","Basic SEO + monthly report"]},
+    {name:"Full Team", tagline:"Your whole marketing dept.", mo:"$199", yr:"$166", setupFee:"$299", features:["Everything in Growth","8 posters + 2 blogs / month","Ads management (1 platform)","Advanced SEO & analytics","Competitor intel + priority support"]},
+    {name:"Custom", tagline:"Bigger goals or multiple locations.", custom:true, features:["Multiple stores or locations","Custom scope & integrations","Dedicated strategy","Volume pricing"]} ]};
+LANG.en.faq = { h:"Questions, answered", items:[
+  {q:"How fast can you build my site?", a:"Days, not months. We even show you a live demo before you pay a cent."},
+  {q:"Do I own my website?", a:"Yes — it's 100% yours, including your content and domain."},
+  {q:"Can I edit it myself?", a:"Yes. You change prices, photos and text in a simple dashboard. We handle the bigger stuff."},
+  {q:"What languages do you work in?", a:"English, Bahasa Indonesia, Khmer — and more on request."},
+  {q:"What if I'm not happy?", a:"You see a free demo first. No commitment until you love it."} ]};
+
+LANG.id.nav = { services:"Layanan", team:"Tim", pricing:"Harga" };
+LANG.id.services = { h:"Semua yang bisa kami lakukan untuk Anda", sub:"Satu tim — seluruh kehadiran online & pertumbuhan Anda, beres.", groups:[
+  { icon:"🌐", title:"Tampil online", items:["Website profesional","Menu digital + kode QR","Pemesanan online via WhatsApp & Telegram","Cepat & ramah ponsel"] },
+  { icon:"🔍", title:"Ditemukan", items:["SEO agar peringkat di Google","Blog & konten yang menjual","Setup Google Business Profile"] },
+  { icon:"📣", title:"Dapatkan pelanggan", items:["Iklan Facebook & Instagram","Konten media sosial","Poster & grafis promo","Kampanye email, WhatsApp & Telegram"] },
+  { icon:"🧠", title:"Lebih cerdas", items:["Analisis pesaing","Audit pertumbuhan — temukan yang merugikan Anda","Saran harga & paket","Strategi merek untuk bisnis baru"] } ]};
+LANG.id.pricing = { h:"Harga sederhana & jujur", sub:"Satu tim. Satu harga bulanan. Batalkan kapan saja.",
+  anchor:"Agensi mematok $1.000–5.000/bln. Ficworks memberi tim yang sama — dengan harga jauh lebih murah.",
+  monthly:"Bulanan", annual:"Tahunan", save:"hemat 2 bulan", popular:"Paling populer", perMo:"/bln",
+  setupPrefix:"+ biaya setup sekali", setupWaived:"Biaya setup digratiskan 🎉",
+  customPrice:"Khusus", cta:"Mulai sekarang", customCta:"Hubungi kami",
+  guarantee:"✓ Demo gratis sebelum bayar   ✓ Batalkan kapan saja   ✓ Setup gratis untuk paket tahunan",
+  note:"Harga dalam USD · draf — difinalkan setelah riset pasar lokal.",
+  tiers:[
+    {name:"Starter", tagline:"Tampil online dengan benar.", mo:"$29", yr:"$24", setupFee:"$149", features:["Website profesional 1 halaman","Hosting + SSL termasuk","Edit konten sendiri","Pemesanan WhatsApp / Telegram","2 pembaruan konten / bulan"]},
+    {name:"Growth", tagline:"Ditemukan dan berkembang.", mo:"$79", yr:"$66", setupFee:"$199", popular:true, features:["Semua di Starter","Website multi-halaman","4 poster sosial / bulan","1 artikel blog / bulan","SEO dasar + laporan bulanan"]},
+    {name:"Full Team", tagline:"Departemen pemasaran lengkap.", mo:"$199", yr:"$166", setupFee:"$299", features:["Semua di Growth","8 poster + 2 blog / bulan","Pengelolaan iklan (1 platform)","SEO & analitik lanjutan","Intel pesaing + dukungan prioritas"]},
+    {name:"Custom", tagline:"Tujuan lebih besar atau banyak lokasi.", custom:true, features:["Banyak toko atau lokasi","Cakupan & integrasi khusus","Strategi khusus","Harga volume"]} ]};
+LANG.id.faq = { h:"Pertanyaan, dijawab", items:[
+  {q:"Seberapa cepat website saya selesai?", a:"Hitungan hari, bukan bulan. Kami bahkan tunjukkan demo langsung sebelum Anda bayar."},
+  {q:"Apakah website ini milik saya?", a:"Ya — 100% milik Anda, termasuk konten dan domain."},
+  {q:"Bisakah saya edit sendiri?", a:"Bisa. Anda ubah harga, foto, dan teks lewat dashboard sederhana. Yang besar kami tangani."},
+  {q:"Bahasa apa saja yang Anda kerjakan?", a:"Inggris, Bahasa Indonesia, Khmer — dan lainnya sesuai permintaan."},
+  {q:"Bagaimana kalau saya tidak puas?", a:"Anda lihat demo gratis dulu. Tanpa komitmen sampai Anda suka."} ]};
+
+LANG.km.nav = { services:"សេវាកម្ម", team:"ក្រុម", pricing:"តម្លៃ" };
+LANG.km.services = { h:"អ្វីៗគ្រប់យ៉ាងដែលយើងអាចធ្វើសម្រាប់អ្នក", sub:"ក្រុមតែមួយ — វត្តមានអនឡាញ និងកំណើនទាំងមូលរបស់អ្នក គ្រប់គ្រងរួចរាល់។", groups:[
+  { icon:"🌐", title:"ឡើងអនឡាញ", items:["គេហទំព័រវិជ្ជាជីវៈ","ម៉ឺនុយឌីជីថល + កូដ QR","ការកក់តាម WhatsApp & Telegram","លឿន & សម្រាប់ទូរស័ព្ទ"] },
+  { icon:"🔍", title:"ត្រូវបានរកឃើញ", items:["SEO ដើម្បីឡើងចំណាត់ថ្នាក់ Google","ប្លុក & មាតិកាដែលលក់បាន","រៀបចំ Google Business Profile"] },
+  { icon:"📣", title:"ទាក់ទាញអតិថិជន", items:["ការផ្សាយ Facebook & Instagram","មាតិកាប្រព័ន្ធផ្សព្វផ្សាយសង្គម","ផ្ទាំងរូបភាព & ក្រាហ្វិកផ្សព្វផ្សាយ","យុទ្ធនាការអ៊ីមែល, WhatsApp & Telegram"] },
+  { icon:"🧠", title:"ឆ្លាតជាងមុន", items:["ការវិភាគគូប្រកួត","សវនកម្មកំណើន — រកអ្វីដែលធ្វើឱ្យអ្នកខាតបង់","ដំបូន្មានតម្លៃ & កញ្ចប់","យុទ្ធសាស្ត្រម៉ាកសម្រាប់អាជីវកម្មថ្មី"] } ]};
+LANG.km.pricing = { h:"តម្លៃសាមញ្ញ និងស្មោះត្រង់", sub:"ក្រុមតែមួយ។ តម្លៃមួយក្នុងមួយខែ។ បោះបង់បានគ្រប់ពេល។",
+  anchor:"អេជេនស៊ីគិតថ្លៃ $1,000–5,000/ខែ។ Ficworks ផ្ដល់ក្រុមដូចគ្នា — ក្នុងតម្លៃថោកជាងច្រើន។",
+  monthly:"ប្រចាំខែ", annual:"ប្រចាំឆ្នាំ", save:"សន្សំ ២ខែ", popular:"ពេញនិយមបំផុត", perMo:"/ខែ",
+  setupPrefix:"+ ថ្លៃរៀបចំម្ដង", setupWaived:"លើកលែងថ្លៃរៀបចំ 🎉",
+  customPrice:"តាមតម្រូវ", cta:"ចាប់ផ្ដើម", customCta:"ទាក់ទងយើង",
+  guarantee:"✓ គំរូឥតគិតថ្លៃមុនបង់ប្រាក់   ✓ បោះបង់បានគ្រប់ពេល   ✓ លើកលែងថ្លៃរៀបចំសម្រាប់គម្រោងប្រចាំឆ្នាំ",
+  note:"តម្លៃជា USD · សេចក្ដីព្រាង — បញ្ចប់បន្ទាប់ពីការស្រាវជ្រាវទីផ្សារក្នុងស្រុក។",
+  tiers:[
+    {name:"Starter", tagline:"ឡើងអនឡាញឱ្យបានត្រឹមត្រូវ។", mo:"$29", yr:"$24", setupFee:"$149", features:["គេហទំព័រវិជ្ជាជីវៈ ១ទំព័រ","រួមបញ្ចូល Hosting + SSL","កែមាតិកាដោយខ្លួនឯង","ការកក់ WhatsApp / Telegram","ធ្វើបច្ចុប្បន្នភាពមាតិកា ២ដង/ខែ"]},
+    {name:"Growth", tagline:"ត្រូវបានរកឃើញ និងរីកចម្រើន។", mo:"$79", yr:"$66", setupFee:"$199", popular:true, features:["គ្រប់យ៉ាងក្នុង Starter","គេហទំព័រច្រើនទំព័រ","ផ្ទាំងរូបភាពសង្គម ៤/ខែ","អត្ថបទប្លុក ១/ខែ","SEO មូលដ្ឋាន + របាយការណ៍ប្រចាំខែ"]},
+    {name:"Full Team", tagline:"ផ្នែកទីផ្សារពេញលេញរបស់អ្នក។", mo:"$199", yr:"$166", setupFee:"$299", features:["គ្រប់យ៉ាងក្នុង Growth","ផ្ទាំងរូបភាព ៨ + ប្លុក ២/ខែ","ការគ្រប់គ្រងការផ្សាយ (១វេទិកា)","SEO និងវិភាគកម្រិតខ្ពស់","ស៊ើបការណ៍គូប្រកួត + ការគាំទ្រអាទិភាព"]},
+    {name:"Custom", tagline:"គោលដៅធំ ឬទីតាំងច្រើន។", custom:true, features:["ហាង ឬទីតាំងច្រើន","វិសាលភាព និងការ integrate តាមតម្រូវ","យុទ្ធសាស្ត្រឯកទេស","តម្លៃតាមបរិមាណ"]} ]};
+LANG.km.faq = { h:"សំណួរ ដែលមានចម្លើយ", items:[
+  {q:"តើអ្នកអាចសាងសង់គេហទំព័រខ្ញុំលឿនប៉ុណ្ណា?", a:"ប៉ុន្មានថ្ងៃ មិនមែនខែ។ យើងថែមទាំងបង្ហាញគំរូផ្ទាល់មុនពេលអ្នកបង់ប្រាក់។"},
+  {q:"តើខ្ញុំជាម្ចាស់គេហទំព័រឬ?", a:"បាទ/ចាស — វាជារបស់អ្នក ១០០% រួមទាំងមាតិកា និងដូមេន។"},
+  {q:"តើខ្ញុំអាចកែវាដោយខ្លួនឯងបានទេ?", a:"បាន។ អ្នកប្ដូរតម្លៃ រូបភាព និងអត្ថបទក្នុង dashboard ងាយស្រួល។ រឿងធំៗយើងគ្រប់គ្រង។"},
+  {q:"តើអ្នកធ្វើការជាភាសាអ្វីខ្លះ?", a:"អង់គ្លេស ឥណ្ឌូនេស៊ី ខ្មែរ — និងផ្សេងទៀតតាមការស្នើសុំ។"},
+  {q:"បើខ្ញុំមិនពេញចិត្តវិញ?", a:"អ្នកមើលគំរូឥតគិតថ្លៃជាមុន។ គ្មានកាតព្វកិច្ចរហូតដល់អ្នកពេញចិត្ត។"} ]};
+
+LANG.en.form = { name:"Your business name", biz:"What's your business? (hotel, cafe, shop…)", city:"City / country", submit:"Get my free website demo →", or:"— or message us directly —" };
+LANG.id.form = { name:"Nama bisnis Anda", biz:"Bisnis Anda apa? (hotel, kafe, toko…)", city:"Kota / negara", submit:"Dapatkan demo website gratis →", or:"— atau chat kami langsung —" };
+LANG.km.form = { name:"ឈ្មោះអាជីវកម្មរបស់អ្នក", biz:"អាជីវកម្មអ្នកអ្វី? (សណ្ឋាគារ កាហ្វេ ហាង…)", city:"ទីក្រុង / ប្រទេស", submit:"ទទួលគំរូគេហទំព័រឥតគិតថ្លៃ →", or:"— ឬផ្ញើសារមកយើងផ្ទាល់ —" };
+
+LANG.en.nav.examples = "Examples";
+LANG.id.nav.examples = "Contoh";
+LANG.km.nav.examples = "គំរូ";
+LANG.en.examples = { h:"See what we can build", sub:"Example sites we've designed — yours could look like any of these.", view:"View demo", types:{ hotel:"Hotel", cafe:"Cafe", salon:"Salon", shop:"Shop", gym:"Gym", clinic:"Clinic" } };
+LANG.id.examples = { h:"Lihat yang bisa kami buat", sub:"Contoh situs yang kami desain — milik Anda bisa seperti ini.", view:"Lihat demo", types:{ hotel:"Hotel", cafe:"Kafe", salon:"Salon", shop:"Toko", gym:"Gym", clinic:"Klinik" } };
+LANG.km.examples = { h:"មើលអ្វីដែលយើងអាចបង្កើត", sub:"គំរូគេហទំព័រដែលយើងបានរចនា — របស់អ្នកអាចមើលទៅបែបនេះ។", view:"មើលគំរូ", types:{ hotel:"សណ្ឋាគារ", cafe:"ហាងកាហ្វេ", salon:"ហាងកាត់សក់", shop:"ហាង", gym:"កន្លែងហាត់ប្រាណ", clinic:"គ្លីនិក" } };
+
+LANG.en.bot = { title:"Ficworks Assistant", greeting:"Hi! 👋 Ask me anything about Ficworks.", chips:{ pricing:"💰 Pricing", services:"🛠️ What you do", speed:"⚡ How fast?", own:"🔑 Do I own it?", sell:"🛒 Sell online?", langs:"🌐 Languages", video:"🎬 AI video?", human:"💬 Talk to a human" }, answers:{ pricing:"Plans start at $29/mo · Growth $79 (most popular) · Full Team $199. Annual saves 2 months — and you get a free demo before you pay a cent.", services:"We build your website, digital menu & QR, content, posters, ads and SEO — your whole online presence. Scroll up to “Everything we can do” to see it all.", speed:"Days, not months. We even show you a live demo of your site before you pay anything.", own:"Yes — your website is 100% yours, including the content and your domain. No lock-in.", sell:"Yes! We can add a real cart + card checkout (Stripe, Xendit, ABA…) or simple WhatsApp/QRIS ordering — whichever suits your business.", langs:"We build and support English, Bahasa Indonesia and Khmer — plus more on request.", video:"Yes! We make AI product videos for ads & social — an add-on, from about $15–30 each. Want one for your business?", human:"Of course! Tap below and a real person will reply fast 👇" }, humanBtn:"Chat with us" };
+LANG.id.bot = { title:"Asisten Ficworks", greeting:"Hai! 👋 Tanya apa saja tentang Ficworks.", chips:{ pricing:"💰 Harga", services:"🛠️ Layanan", speed:"⚡ Berapa cepat?", own:"🔑 Milik saya?", sell:"🛒 Jual online?", langs:"🌐 Bahasa", video:"🎬 Video AI?", human:"💬 Bicara dengan orang" }, answers:{ pricing:"Paket mulai $29/bln · Growth $79 (terpopuler) · Full Team $199. Tahunan hemat 2 bulan — dan Anda dapat demo gratis sebelum bayar.", services:"Kami buat website, menu digital & QR, konten, poster, iklan, dan SEO — seluruh kehadiran online Anda. Gulir ke atas ke “Semua yang bisa kami lakukan”.", speed:"Hitungan hari, bukan bulan. Kami bahkan tunjukkan demo langsung sebelum Anda bayar.", own:"Ya — website 100% milik Anda, termasuk konten dan domain. Tanpa terkunci.", sell:"Bisa! Kami tambahkan keranjang + pembayaran kartu (Stripe, Xendit, ABA…) atau pemesanan WhatsApp/QRIS — sesuai bisnis Anda.", langs:"Kami buat dalam bahasa Inggris, Indonesia, dan Khmer — plus lainnya sesuai permintaan.", video:"Bisa! Kami buat video produk AI untuk iklan & sosial — tambahan, mulai sekitar $15–30 per video. Mau?", human:"Tentu! Ketuk di bawah dan tim kami akan segera membalas 👇" }, humanBtn:"Chat dengan kami" };
+LANG.km.bot = { title:"ជំនួយការ Ficworks", greeting:"សួស្ដី! 👋 សួរអ្វីក៏បានអំពី Ficworks។", chips:{ pricing:"💰 តម្លៃ", services:"🛠️ សេវាកម្ម", speed:"⚡ លឿនប៉ុណ្ណា?", own:"🔑 ខ្ញុំជាម្ចាស់?", sell:"🛒 លក់អនឡាញ?", langs:"🌐 ភាសា", video:"🎬 វីដេអូ AI?", human:"💬 និយាយជាមួយមនុស្ស" }, answers:{ pricing:"គម្រោងចាប់ពី $29/ខែ · Growth $79 (ពេញនិយម) · Full Team $199។ ប្រចាំឆ្នាំសន្សំ ២ខែ — ហើយអ្នកទទួលគំរូឥតគិតថ្លៃមុនពេលបង់ប្រាក់។", services:"យើងបង្កើតគេហទំព័រ ម៉ឺនុយឌីជីថល & QR មាតិកា ផ្ទាំងរូបភាព ការផ្សាយ និង SEO — វត្តមានអនឡាញទាំងមូលរបស់អ្នក។", speed:"ប៉ុន្មានថ្ងៃ មិនមែនខែ។ យើងថែមទាំងបង្ហាញគំរូផ្ទាល់មុនពេលអ្នកបង់ប្រាក់។", own:"បាទ/ចាស — គេហទំព័រជារបស់អ្នក ១០០% រួមទាំងមាតិកា និងដូមេន។ គ្មានការចងភ្ជាប់។", sell:"បាន! យើងបន្ថែមកន្ត្រក + ការទូទាត់កាត (Stripe, Xendit, ABA…) ឬការកក់តាម WhatsApp/QRIS — តាមអាជីវកម្មរបស់អ្នក។", langs:"យើងបង្កើតជាភាសាអង់គ្លេស ឥណ្ឌូនេស៊ី និងខ្មែរ — និងផ្សេងទៀតតាមការស្នើសុំ។", video:"បាន! យើងបង្កើតវីដេអូផលិតផល AI សម្រាប់ការផ្សាយ & សង្គម — កម្មវិធីបន្ថែម ចាប់ពី $15–30 ក្នុងមួយ។ ចង់បានទេ?", human:"ប្រាកដណាស់! ចុចខាងក្រោម យើងនឹងឆ្លើយតបយ៉ាងលឿន 👇" }, humanBtn:"ជជែកជាមួយយើង" };
+
+LANG.en.trust = [ {t:"Billion-dollar design",d:"The polish of the world's biggest brands. Never a generic template."}, {t:"A whole team, one price",d:"7 AI specialists for less than the cost of one freelancer."}, {t:"Free demo first",d:"See your actual site, live, before you pay a cent."}, {t:"Built for your market",d:"Your language, WhatsApp & Telegram, 24/7 support."} ];
+LANG.id.trust = [ {t:"Desain kelas dunia",d:"Kualitas merek terbesar dunia. Bukan template biasa."}, {t:"Satu tim, satu harga",d:"7 spesialis AI, lebih murah dari satu freelancer."}, {t:"Demo gratis dulu",d:"Lihat website Anda yang asli, langsung, sebelum bayar."}, {t:"Dibangun untuk pasar Anda",d:"Bahasa Anda, WhatsApp & Telegram, dukungan 24/7."} ];
+LANG.km.trust = [ {t:"ការរចនាកម្រិតពិភពលោក",d:"គុណភាពម៉ាកធំៗបំផុតលើពិភពលោក។ មិនមែន template ធម្មតា។"}, {t:"ក្រុមតែមួយ តម្លៃតែមួយ",d:"អ្នកជំនាញ AI ៧នាក់ ថោកជាង freelancer ម្នាក់។"}, {t:"គំរូឥតគិតថ្លៃជាមុន",d:"មើលគេហទំព័រពិតរបស់អ្នក ផ្ទាល់ មុនពេលបង់ប្រាក់។"}, {t:"បង្កើតសម្រាប់ទីផ្សារអ្នក",d:"ភាសារបស់អ្នក WhatsApp & Telegram ការគាំទ្រ ២៤/៧។"} ];
+
+LANG.en.pricing.addons = "✨ Add-ons, priced separately: AI product videos · online store & payments · extra languages.";
+LANG.id.pricing.addons = "✨ Tambahan, harga terpisah: video produk AI · toko online & pembayaran · bahasa tambahan.";
+LANG.km.pricing.addons = "✨ កម្មវិធីបន្ថែម តម្លៃដាច់ដោយឡែក៖ វីដេអូផលិតផល AI · ហាងអនឡាញ & ការទូទាត់ · ភាសាបន្ថែម។";
+</script>
+
+<!-- NAV -->
+<header class="fixed w-full z-50 top-0 px-6 md:px-12 py-5 flex items-center justify-between backdrop-blur bg-[#0c1117]/70">
+  <div class="display text-lg font-bold" id="agName"></div>
+  <nav class="hidden md:flex gap-8 text-sm font-medium text-white/70 absolute left-1/2 -translate-x-1/2">
+    <a href="#services" id="navServices" class="hover:text-white transition"></a>
+    <a href="#examples" id="navExamples" class="hover:text-white transition"></a>
+    <a href="#team" id="navTeam" class="hover:text-white transition"></a>
+    <a href="#pricing" id="navPricing" class="hover:text-white transition"></a>
+  </nav>
+  <div class="flex items-center gap-4">
+    <div id="langSwitch" class="flex gap-2 text-xs font-semibold"></div>
+    <a href="#contact" id="navCta" class="bg-white text-[#0c1117] px-5 py-2 rounded-full text-sm font-semibold hover:bg-[#eab308] transition"></a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="relative px-6 md:px-12 pt-36 pb-20 max-w-6xl mx-auto text-center overflow-hidden">
+  <div class="pointer-events-none absolute inset-0 -z-10">
+    <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-[42rem] h-[42rem] rounded-full bg-[#eab308]/10 blur-[130px]"></div>
+    <div class="absolute top-44 left-1/4 w-[26rem] h-[26rem] rounded-full bg-[#22d3ee]/10 blur-[130px]"></div>
+  </div>
+  <p id="heroEyebrow" class="inline-block border border-white/15 rounded-full px-4 py-1.5 text-xs text-white/60 mb-8 backdrop-blur"></p>
+  <h1 id="heroH" class="display text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight mb-7 bg-gradient-to-b from-white to-white/55 bg-clip-text text-transparent"></h1>
+  <p id="heroSub" class="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-12 leading-relaxed"></p>
+  <div class="slot rounded-3xl border border-white/10 aspect-[16/9] max-w-5xl mx-auto glow ring-1 ring-white/10" style="--c:#eab308">
+    <video class="heroimg" autoplay loop muted playsinline poster="characters/hq-scene.png"
+           style="width:100%;height:100%;object-fit:cover;position:relative;z-index:2">
+      <source src="characters/hq-scene.mp4" type="video/mp4" />
+    </video>
+    <div class="ph flex-col gap-2 text-white/40 text-sm">
+      <div class="text-4xl">🛋️🪶🔍📊🔭😈📣📐</div>
+      <div>drop <code>characters/hq-scene.mp4</code> here to make it move</div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section class="px-6 md:px-12 pb-10 max-w-6xl mx-auto">
+  <div id="trustGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+</section>
+
+<!-- EXAMPLES (moved up: show the product first) -->
+<section id="examples" class="px-6 md:px-12 py-20 max-w-6xl mx-auto">
+  <div class="text-center mb-14">
+    <h2 id="exH" class="display text-4xl md:text-6xl font-bold tracking-tight"></h2>
+    <p id="exSub" class="text-white/55 mt-4 max-w-2xl mx-auto"></p>
+  </div>
+  <div id="exGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+</section>
+
+<!-- GAP -->
+<section class="px-6 md:px-12 py-24 bg-[#0f1620] border-y border-white/5">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-14">
+      <p id="gapEyebrow" class="uppercase tracking-[0.3em] text-xs text-[#eab308] mb-3"></p>
+      <h2 id="gapH" class="display text-4xl md:text-6xl font-bold tracking-tight"></h2>
+      <p id="gapSub" class="text-white/55 mt-4 max-w-2xl mx-auto"></p>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6 items-stretch">
+      <div class="pop glow rounded-3xl p-8 bg-[#1a1416] border border-[#f43f5e]/30" style="--c:#f43f5e;--d:0s">
+        <div class="flex items-center gap-3 mb-6"><svg class="w-6 h-6 text-[#f43f5e] shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="m15 9-6 6m0-6 6 6"/></svg><h3 id="withoutH" class="display text-xl font-semibold text-[#f43f5e]"></h3></div>
+        <ul id="withoutList" class="space-y-4 text-sm text-white/65"></ul>
+      </div>
+      <div class="pop rounded-3xl p-8 bg-[#13211c] border border-[#34d399]/30 glow" style="--c:#34d399;--d:0.12s">
+        <div class="flex items-center gap-3 mb-6"><svg class="w-6 h-6 text-[#34d399] shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="m8.5 12.5 2.5 2.5 4.5-5"/></svg><h3 id="withH" class="display text-xl font-semibold text-[#34d399]"></h3></div>
+        <ul id="withList" class="space-y-4 text-sm text-white/80"></ul>
+      </div>
+    </div>
+    <p id="gapFoot" class="text-center text-white/50 text-sm mt-10"></p>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section id="team" class="px-6 md:px-12 py-16 max-w-6xl mx-auto">
+  <h2 id="teamH" class="display text-4xl md:text-5xl font-bold tracking-tight text-center mb-3"></h2>
+  <p id="teamSub" class="text-white/50 text-center mb-14"></p>
+  <div id="agentGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+</section>
+
+<!-- SERVICES -->
+<section id="services" class="px-6 md:px-12 py-24 max-w-6xl mx-auto">
+  <div class="text-center mb-14">
+    <h2 id="svcH" class="display text-4xl md:text-6xl font-bold tracking-tight"></h2>
+    <p id="svcSub" class="text-white/55 mt-4 max-w-2xl mx-auto"></p>
+  </div>
+  <div id="svcGrid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="px-6 md:px-12 py-20 bg-[#0f1620] border-y border-white/5">
+  <div id="stepsGrid" class="max-w-5xl mx-auto grid md:grid-cols-3 gap-10 text-center"></div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="px-6 md:px-12 py-24 max-w-6xl mx-auto">
+  <div class="text-center mb-6">
+    <h2 id="priceH" class="display text-4xl md:text-6xl font-bold tracking-tight"></h2>
+    <p id="priceSub" class="text-white/55 mt-4 max-w-2xl mx-auto"></p>
+  </div>
+  <p id="priceAnchor" class="text-center max-w-2xl mx-auto mb-8 text-sm text-[#34d399] bg-[#13211c] border border-[#34d399]/30 rounded-2xl px-5 py-3"></p>
+  <div class="flex justify-center mb-10">
+    <div class="inline-flex bg-[#0f1115] border border-white/10 rounded-full p-1 text-sm">
+      <button id="billMo" class="px-4 py-1.5 rounded-full font-semibold transition"></button>
+      <button id="billYr" class="px-4 py-1.5 rounded-full font-semibold transition"></button>
+    </div>
+  </div>
+  <div id="priceGrid" class="grid md:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch"></div>
+  <p id="priceAddons" class="text-center text-sm text-white/70 mt-8 bg-[#0f1115] border border-white/5 rounded-2xl py-3.5 px-5 max-w-2xl mx-auto"></p>
+  <p id="priceGuarantee" class="text-center text-white/65 text-sm mt-10"></p>
+  <p id="priceNote" class="text-center text-white/35 text-xs mt-3"></p>
+</section>
+
+<!-- CASE STUDY removed for now — re-add when a real client is live -->
+
+<!-- FAQ -->
+<section class="px-6 md:px-12 py-24 max-w-3xl mx-auto">
+  <h2 id="faqH" class="display text-4xl md:text-5xl font-bold tracking-tight text-center mb-12"></h2>
+  <div id="faqList" class="space-y-3"></div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="px-6 md:px-12 py-28 text-center bg-gradient-to-b from-[#0c1117] to-[#15110a]">
+  <h2 id="finalH" class="display text-4xl md:text-6xl font-bold tracking-tight mb-6 max-w-3xl mx-auto"></h2>
+  <p id="finalSub" class="text-white/60 mb-8"></p>
+  <form id="demoForm" class="max-w-md mx-auto grid gap-3 text-left">
+    <input id="fName" required class="bg-[#0f1115] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-[#eab308]" />
+    <input id="fBiz" required class="bg-[#0f1115] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-[#eab308]" />
+    <input id="fCity" class="bg-[#0f1115] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-[#eab308]" />
+    <button type="submit" id="fSubmit" class="bg-[#eab308] text-[#0c1117] rounded-full py-3.5 font-semibold hover:bg-white transition"></button>
+  </form>
+  <p id="finalOr" class="text-white/40 text-xs my-5"></p>
+  <a href="#" id="finalBtn" class="inline-block bg-[#25D366] text-white px-10 py-4 rounded-full font-semibold hover:opacity-90 transition"></a>
+</section>
+
+<footer class="px-6 md:px-12 py-10 text-center text-white/40 text-sm border-t border-white/5">
+  <span class="display text-white/70" id="footName"></span> · <span id="footText"></span>
+</footer>
+
+<!-- SUPPORT CHAT -->
+<button id="chatBubble" class="fixed bottom-5 right-5 z-[60] w-14 h-14 rounded-full bg-[#eab308] text-[#0c1117] text-2xl shadow-lg hover:scale-105 transition flex items-center justify-center">💬</button>
+<div id="chatPanel" class="fixed bottom-24 right-5 z-[60] w-[90vw] max-w-sm rounded-2xl bg-[#0f1115] border border-white/10 shadow-2xl hidden flex-col overflow-hidden">
+  <div class="bg-[#0f1620] px-4 py-3 flex items-center justify-between border-b border-white/5">
+    <span id="chatTitle" class="font-semibold text-sm"></span>
+    <button id="chatClose" class="text-white/50 hover:text-white text-lg leading-none">✕</button>
+  </div>
+  <div id="chatBody" class="p-4 space-y-3 text-sm max-h-80 overflow-y-auto"></div>
+  <div id="chatChips" class="p-3 border-t border-white/5 flex flex-wrap gap-2"></div>
+</div>
+
+<script>
+  const nav = (navigator.language || "").toLowerCase();
+  let lang = nav.startsWith("id") || nav.startsWith("ms") ? "id" : nav.startsWith("km") ? "km" : "en";
+  let billing = 'mo';
+
+  function $(id){ return document.getElementById(id); }
+
+  // hover-to-greet: play a character's wave clip on hover if its file exists, else stay on the still
+  function playWave(slot){
+    const v = slot.querySelector('video.wave');
+    if(!v) return;
+    v.play().then(() => { v.style.opacity = 1; }).catch(() => {}); // no file → stays hidden, still shows
+  }
+  function stopWave(slot){
+    const v = slot.querySelector('video.wave');
+    if(!v) return;
+    v.style.opacity = 0; v.pause(); v.currentTime = 0;
+  }
+
+  function renderExtras(lang){
+    const t = LANG[lang];
+    $('navServices').textContent = t.nav.services;
+    $('navTeam').textContent = t.nav.team;
+    $('navPricing').textContent = t.nav.pricing;
+
+    $('svcH').textContent = t.services.h;
+    $('svcSub').textContent = t.services.sub;
+    const svcIcons = [
+      '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>',
+      '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m21 21-4.3-4.3"/></svg>',
+      '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 11v2a1 1 0 0 0 1 1h2l9 4V6L6 10H4a1 1 0 0 0-1 1z"/><path stroke-linecap="round" d="M18 8a5 5 0 0 1 0 8"/></svg>',
+      '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/></svg>'
+    ];
+    $('svcGrid').innerHTML = t.services.groups.map((g, idx) => `
+      <div class="pop rounded-2xl p-7 bg-[#0f1115] border border-white/5 hover:border-white/15 transition-all duration-200 hover:shadow-2xl hover:shadow-black/40" style="--d:${(idx*0.06).toFixed(2)}s">
+        <div class="text-[#eab308] mb-5">${svcIcons[idx] || ''}</div>
+        <h3 class="display text-lg font-semibold mb-4">${g.title}</h3>
+        <ul class="space-y-3 text-sm text-white/60">${g.items.map(i => `<li class="flex gap-2.5"><svg class="w-4 h-4 mt-0.5 shrink-0 text-[#34d399]" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg><span>${i}</span></li>`).join('')}</ul>
+      </div>`).join('');
+
+    $('priceH').textContent = t.pricing.h;
+    $('priceSub').textContent = t.pricing.sub;
+    $('priceAnchor').textContent = t.pricing.anchor;
+    $('priceGuarantee').textContent = t.pricing.guarantee;
+    $('priceNote').textContent = t.pricing.note;
+    $('priceAddons').textContent = t.pricing.addons;
+    $('billMo').textContent = t.pricing.monthly;
+    $('billYr').textContent = t.pricing.annual + ' · ' + t.pricing.save;
+    $('billMo').style.background = billing === 'mo' ? '#fff' : 'transparent';
+    $('billMo').style.color = billing === 'mo' ? '#0c1117' : '#fff';
+    $('billYr').style.background = billing === 'yr' ? '#fff' : 'transparent';
+    $('billYr').style.color = billing === 'yr' ? '#0c1117' : '#fff';
+    $('priceGrid').innerHTML = t.pricing.tiers.map((p, i) => {
+      const pop = !!p.popular, isCustom = !!p.custom;
+      const priceBlock = isCustom
+        ? `<div class="mb-1"><span class="display text-3xl font-bold">${t.pricing.customPrice}</span></div><div class="text-xs text-white/40 mb-4">&nbsp;</div>`
+        : `<div class="mb-1"><span class="display text-4xl font-bold">${billing === 'yr' ? p.yr : p.mo}</span><span class="text-white/50">${t.pricing.perMo}</span></div>
+           <div class="text-xs ${billing === 'yr' ? 'text-[#34d399]' : 'text-white/40'} mb-4">${billing === 'yr' ? t.pricing.setupWaived : t.pricing.setupPrefix + ' ' + p.setupFee}</div>`;
+      return `<div class="pop rounded-3xl p-6 bg-[#0f1115] border ${pop ? 'border-[#eab308] glow' : 'border-white/10'} relative flex flex-col transition-all duration-200" style="--c:#eab308;--d:${(i*0.06).toFixed(2)}s">
+        ${pop ? `<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#eab308] text-[#0c1117] text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap">${t.pricing.popular}</div>` : ''}
+        <h3 class="display text-xl font-bold mb-1">${p.name}</h3>
+        <p class="text-white/50 text-sm mb-4">${p.tagline}</p>
+        ${priceBlock}
+        <ul class="space-y-2 mb-6 text-sm text-white/70 flex-1">${p.features.map(f => `<li class="flex gap-2"><span class="text-[#34d399] shrink-0">✓</span> ${f}</li>`).join('')}</ul>
+        <a href="#contact" class="block text-center ${pop ? 'bg-[#eab308] text-[#0c1117]' : 'bg-white/10 text-white'} rounded-full py-3 font-semibold hover:opacity-90 transition">${isCustom ? t.pricing.customCta : t.pricing.cta}</a>
+      </div>`;
+    }).join('');
+
+    $('faqH').textContent = t.faq.h;
+    $('faqList').innerHTML = t.faq.items.map(f => `
+      <details class="group rounded-2xl bg-[#0f1115] border border-white/5 p-5">
+        <summary class="cursor-pointer font-medium list-none flex justify-between items-center gap-4">${f.q}<span class="text-white/40 group-open:rotate-45 transition shrink-0">+</span></summary>
+        <p class="text-sm text-white/55 mt-3 leading-relaxed">${f.a}</p>
+      </details>`).join('');
+
+    $('fName').placeholder = t.form.name;
+    $('fBiz').placeholder = t.form.biz;
+    $('fCity').placeholder = t.form.city;
+    $('fSubmit').textContent = t.form.submit;
+    $('finalOr').textContent = t.form.or;
+
+    $('navExamples').textContent = t.nav.examples;
+    $('exH').textContent = t.examples.h;
+    $('exSub').textContent = t.examples.sub;
+    $('exGrid').innerHTML = EXAMPLES.map((e, idx) => `
+      <a href="${e.link}" target="_blank" class="pop group relative block rounded-2xl overflow-hidden aspect-[4/3] bg-[#0f1115] transition-all duration-300 hover:shadow-2xl hover:shadow-black/50" style="--d:${(idx*0.06).toFixed(2)}s">
+        <img src="${e.img}" alt="${e.name}" onerror="this.style.display='none'" class="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.06] transition duration-700">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 p-5 flex items-end justify-between gap-3">
+          <div>
+            <div class="text-[11px] uppercase tracking-[0.2em] text-[#eab308] mb-1.5">${t.examples.types[e.key]}</div>
+            <div class="display text-xl font-semibold text-white tracking-tight">${e.name}</div>
+          </div>
+          <span class="text-sm text-white/70 group-hover:text-white group-hover:translate-x-0.5 transition whitespace-nowrap pb-0.5">${t.examples.view} →</span>
+        </div>
+      </a>`).join('');
+
+    $('trustGrid').innerHTML = t.trust.map(x => `<div class="rounded-2xl p-5 bg-[#0f1115] border border-white/5"><div class="font-semibold text-sm mb-1 tracking-tight">${x.t}</div><div class="text-xs text-white/55 leading-relaxed">${x.d}</div></div>`).join('');
+  }
+
+  function renderLang() {
+    const t = LANG[lang];
+    $('agName').textContent = AGENCY_NAME;
+    $('footName').textContent = AGENCY_NAME;
+    $('navCta').textContent = t.cta_nav;
+    $('heroEyebrow').textContent = t.hero_eyebrow;
+    $('heroH').textContent = t.hero_h;
+    $('heroSub').textContent = t.hero_sub;
+    $('gapEyebrow').textContent = t.gap_eyebrow;
+    $('gapH').textContent = t.gap_h;
+    $('gapSub').textContent = t.gap_sub;
+    $('withoutH').textContent = t.without_h;
+    $('withH').textContent = t.with_h;
+    $('gapFoot').textContent = t.gap_foot;
+    $('teamH').textContent = t.team_h;
+    $('teamSub').textContent = t.team_sub;
+    // case study section removed for now — re-add when a real client is live
+    $('finalH').textContent = t.final_h;
+    $('finalSub').textContent = t.final_sub;
+    $('finalBtn').textContent = t.final_btn;
+    const useTelegram = (lang === 'km');   // Cambodia → Telegram, everyone else → WhatsApp
+    $('finalBtn').href = useTelegram ? ("https://t.me/" + CONTACT.telegram) : ("https://wa.me/" + CONTACT.whatsapp);
+    $('finalBtn').style.backgroundColor = useTelegram ? "#229ED9" : "#25D366";
+    $('footText').textContent = t.footer;
+    document.documentElement.lang = lang;
+
+    $('withoutList').innerHTML = t.without.map(x => `<li class="flex gap-3"><span class="text-[#f43f5e]">✕</span> ${x}</li>`).join('');
+    $('withList').innerHTML    = t.with.map(x => `<li class="flex gap-3"><span class="text-[#34d399]">✓</span> ${x}</li>`).join('');
+
+    $('agentGrid').innerHTML = VISUAL.agents.map((a,i) => `
+      <div class="agent-card rounded-3xl p-6 bg-[#0f1115] border border-white/5 hover:border-white/15 hover:shadow-2xl hover:shadow-black/40 transition-all duration-200" style="--c:${a.c};--d:${(i*0.12).toFixed(2)}s">
+        <div class="slot rounded-2xl aspect-square mb-5 glow" style="--c:${a.c}" onmouseenter="playWave(this)" onmouseleave="stopWave(this)">
+          <img class="charimg" style="--delay:${(i*0.45).toFixed(2)}s;--dur:${(3.6+(i%3)*0.7).toFixed(2)}s" src="${a.img}" alt="${a.name}" onerror="this.style.display='none'" />
+          <video class="wave" muted loop playsinline preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:3;opacity:0;transition:opacity .25s"><source src="${a.img.replace('.png','-wave.mp4')}" type="video/mp4"></video>
+          <div class="ph">${a.emoji}</div>
+        </div>
+        <div class="text-xs uppercase tracking-wider mb-1" style="color:${a.c}">${t.roles[i].r}</div>
+        <h3 class="display text-xl font-semibold mb-2">${a.name}</h3>
+        <p class="text-sm text-white/55 leading-relaxed">${t.roles[i].d}</p>
+      </div>`).join('');
+
+    $('stepsGrid').innerHTML = t.steps.map((s,i) => `
+      <div><div class="display text-4xl font-bold text-[#eab308] mb-3">${i+1}</div>
+      <h3 class="display font-semibold mb-2">${s.t}</h3>
+      <p class="text-sm text-white/55">${s.d}</p></div>`).join('');
+
+    document.querySelectorAll('.langbtn').forEach(b => b.classList.toggle('active', b.dataset.l === lang));
+
+    renderExtras(lang);
+    renderBot();
+    observeReveal();
+  }
+
+  $('langSwitch').innerHTML = Object.keys(LANG).map(code =>
+    `<button class="langbtn px-2 py-1 hover:opacity-100" data-l="${code}">${LANG[code].label}</button>`).join('<span class="text-white/20">|</span>');
+  $('langSwitch').addEventListener('click', e => {
+    if (e.target.dataset.l) { lang = e.target.dataset.l; renderLang(); }
+  });
+
+  $('billMo').addEventListener('click', () => { billing = 'mo'; renderExtras(lang); observeReveal(); });
+  $('billYr').addEventListener('click', () => { billing = 'yr'; renderExtras(lang); observeReveal(); });
+
+  function requestDemo(e){
+    e.preventDefault();
+    const msg = "Hi Ficworks! I'd like a free website demo.\n• Business: " + $('fName').value.trim() + "\n• Type: " + $('fBiz').value.trim() + "\n• Location: " + $('fCity').value.trim();
+    if (lang === 'km') window.open('https://t.me/' + CONTACT.telegram, '_blank');
+    else window.open('https://wa.me/' + CONTACT.whatsapp + '?text=' + encodeURIComponent(msg), '_blank');
+  }
+  $('demoForm').addEventListener('submit', requestDemo);
+
+  // support chat widget
+  function appendMsg(html, who){
+    const d = document.createElement('div');
+    d.className = who === 'user' ? 'text-right' : '';
+    d.innerHTML = '<span class="inline-block ' + (who === 'user' ? 'bg-[#eab308] text-[#0c1117]' : 'bg-[#1a2530] text-white/90') + ' rounded-2xl px-3 py-2 max-w-[85%]">' + html + '</span>';
+    $('chatBody').appendChild(d); $('chatBody').scrollTop = $('chatBody').scrollHeight;
+  }
+  function renderBot(){
+    const t = LANG[lang].bot;
+    $('chatTitle').textContent = t.title;
+    $('chatBody').innerHTML = '';
+    appendMsg(t.greeting, 'bot');
+    $('chatChips').innerHTML = Object.keys(t.chips).map(k => '<button class="chip bg-[#1a2530] hover:bg-[#22303d] border border-white/10 rounded-full px-3 py-1.5 text-xs transition" data-k="' + k + '">' + t.chips[k] + '</button>').join('');
+  }
+  $('chatBubble').addEventListener('click', () => { $('chatPanel').classList.toggle('hidden'); $('chatPanel').classList.toggle('flex'); });
+  $('chatClose').addEventListener('click', () => { $('chatPanel').classList.add('hidden'); $('chatPanel').classList.remove('flex'); });
+  $('chatChips').addEventListener('click', e => {
+    const k = e.target.dataset.k; if (!k) return;
+    const t = LANG[lang].bot;
+    appendMsg(t.chips[k], 'user');
+    setTimeout(() => {
+      appendMsg(t.answers[k], 'bot');
+      if (k === 'human') {
+        const url = lang === 'km' ? 'https://t.me/' + CONTACT.telegram : 'https://wa.me/' + CONTACT.whatsapp;
+        appendMsg('<a href="' + url + '" target="_blank" class="underline text-[#34d399]">' + t.humanBtn + ' →</a>', 'bot');
+      }
+    }, 300);
+  });
+
+  const revealObs = ('IntersectionObserver' in window) ? new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); revealObs.unobserve(e.target); } });
+  }, { threshold: 0.08, rootMargin: '0px 0px -8% 0px' }) : null;
+  function observeReveal(){
+    const els = document.querySelectorAll('.pop:not(.in), .agent-card:not(.in)');
+    if (revealObs) els.forEach(c => revealObs.observe(c)); else els.forEach(c => c.classList.add('in'));
+  }
+  renderLang();
+</script>
+</body>
+</html>

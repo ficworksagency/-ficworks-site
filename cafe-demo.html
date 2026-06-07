@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kopi Senja — Coffee House</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  body { font-family:'Inter',sans-serif; }
+  .serif { font-family:'Fraunces',serif; }
+  html { scroll-behavior:smooth; }
+  .photo { background:linear-gradient(135deg,#6f4a2f,#8a5a37); }
+  .photo img { width:100%; height:100%; object-fit:cover; }
+  .reveal { opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){ .reveal{opacity:1;transform:none} }
+</style>
+</head>
+<body class="bg-[#faf6f0] text-[#2b211a] antialiased">
+
+<!-- ============================================================= -->
+<!--  ↓↓↓  THE ONLY PART THE OWNER EVER EDITS  ↓↓↓                 -->
+<!--  Change prices, add items, mark sold out — in seconds.        -->
+<!-- ============================================================= -->
+<script>
+const CONTENT = {
+  cafeName: "Kopi Senja",
+  tagline: "Slow coffee, warm corners, golden afternoons.",
+  heroImg: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?q=80&w=1920&auto=format&fit=crop",
+  whatsapp: "+62 812 0000 0000",
+  address: "Jl. Kemang Raya No.12, Jakarta",
+  hours: "Open daily · 8am – 10pm",
+  about: "A neighbourhood coffee house in the heart of the city. Single-origin beans, roasted in small batches, poured with care. Pull up a chair and stay a while.",
+  signatures: [
+    { name:"Kopi Susu Senja", price:"25.000", desc:"Our signature palm-sugar latte.", img:"https://images.unsplash.com/photo-1561882468-9110e03e0f78?q=80&w=900&auto=format&fit=crop" },
+    { name:"Es Kopi Aren",    price:"26.000", desc:"Iced espresso, aren sugar, fresh milk.", img:"https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?q=80&w=900&auto=format&fit=crop" }
+  ],
+  menu: [
+    { cat:"Coffee", items:[
+      { name:"Kopi Tubruk", price:"15.000" }, { name:"Kopi Susu Senja", price:"25.000" },
+      { name:"Cappuccino", price:"28.000" }, { name:"Es Kopi Aren", price:"26.000" } ]},
+    { cat:"Non-Coffee", items:[
+      { name:"Matcha Latte", price:"30.000" }, { name:"Cokelat Panas", price:"28.000" }, { name:"Es Teh Leci", price:"18.000" } ]},
+    { cat:"Bites", items:[
+      { name:"Butter Croissant", price:"22.000" }, { name:"Pisang Goreng", price:"18.000" }, { name:"Roti Bakar Cokelat", price:"20.000" } ]}
+  ]
+};
+</script>
+<!-- ============================================================= -->
+
+<!-- NAV -->
+<header class="fixed w-full z-50 top-0 px-6 md:px-12 py-5 flex items-center justify-between text-[#faf6f0]">
+  <div class="serif text-2xl tracking-tight" id="navName"></div>
+  <nav class="hidden md:flex gap-8 text-sm font-light tracking-wide">
+    <a href="#menu" class="hover:opacity-70 transition">Menu</a>
+    <a href="#visit" class="hover:opacity-70 transition">Visit</a>
+  </nav>
+  <a id="navOrder" href="#" class="border border-[#faf6f0]/40 rounded-full px-5 py-2 text-xs tracking-widest uppercase hover:bg-[#faf6f0] hover:text-[#2b211a] transition">Order</a>
+</header>
+
+<!-- HERO -->
+<section class="relative h-screen photo flex items-end">
+  <img id="heroImg" alt="" onerror="this.style.display='none'" />
+  <div class="absolute inset-0 bg-gradient-to-t from-[#1c140e] via-[#1c140e]/35 to-[#1c140e]/30"></div>
+  <div class="relative z-10 px-6 md:px-12 pb-24 max-w-2xl text-[#faf6f0]">
+    <p class="uppercase tracking-[0.35em] text-[11px] text-[#e6b87f] mb-6">Coffee House · Jakarta</p>
+    <h1 id="heroName" class="serif text-6xl md:text-8xl leading-[0.95] mb-6 font-medium"></h1>
+    <p id="heroTag" class="text-lg md:text-xl font-light text-[#faf6f0]/85 max-w-md"></p>
+  </div>
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-[#faf6f0]/50 text-xs tracking-widest uppercase">Scroll</div>
+</section>
+
+<!-- ABOUT + FEATURES -->
+<section class="px-6 md:px-12 py-28 max-w-5xl mx-auto">
+  <div class="grid md:grid-cols-5 gap-12 items-center">
+    <p id="about" class="reveal md:col-span-3 serif text-3xl md:text-4xl leading-snug text-[#6f4a2f]"></p>
+    <div id="features" class="reveal md:col-span-2 space-y-6"></div>
+  </div>
+</section>
+
+<!-- SIGNATURES -->
+<section class="px-6 md:px-12 pb-12 max-w-5xl mx-auto">
+  <p class="uppercase tracking-[0.3em] text-[11px] text-[#b9774e] mb-8 text-center">House favourites</p>
+  <div id="signatures" class="grid sm:grid-cols-2 gap-8"></div>
+</section>
+
+<!-- MENU -->
+<section id="menu" class="px-6 md:px-12 py-28 max-w-3xl mx-auto">
+  <div class="text-center mb-16">
+    <h2 class="serif text-5xl md:text-6xl text-[#2b211a] mb-4">The Menu</h2>
+    <p class="text-[#2b211a]/50 text-sm">Tap any item to order on WhatsApp</p>
+  </div>
+  <div id="menuList" class="space-y-14"></div>
+</section>
+
+<!-- QR -->
+<section class="px-6 md:px-12 py-24 bg-[#2b211a] text-[#faf6f0]">
+  <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+    <div>
+      <p class="uppercase tracking-[0.3em] text-[11px] text-[#e6b87f] mb-4">At the table</p>
+      <h2 class="serif text-4xl md:text-5xl mb-5 leading-tight">Scan, browse, order.</h2>
+      <p class="text-[#faf6f0]/70 leading-relaxed">Place this QR on every table. Guests scan it, see the live menu on their phone, and order — no app, no paper, no waiting.</p>
+    </div>
+    <div class="flex justify-center"><div class="bg-[#faf6f0] p-5 rounded-3xl"><div id="qr"></div></div></div>
+  </div>
+</section>
+
+<!-- VISIT -->
+<section id="visit" class="px-6 md:px-12 py-28 max-w-3xl mx-auto text-center">
+  <h2 class="serif text-5xl text-[#6f4a2f] mb-8">Come say hi</h2>
+  <p id="visitAddr" class="text-xl text-[#2b211a]/80"></p>
+  <p id="visitHours" class="text-[#2b211a]/50 mt-2 mb-10"></p>
+  <a id="orderBtn" href="#" class="inline-flex items-center gap-2 bg-[#2b211a] text-[#faf6f0] px-9 py-4 rounded-full text-sm tracking-wide hover:bg-[#b9774e] transition"></a>
+</section>
+
+<footer class="bg-[#1c140e] text-[#faf6f0]/55 px-6 md:px-12 py-12 text-center text-sm">
+  <div class="serif text-2xl text-[#faf6f0] mb-2" id="footName"></div>
+  <p id="footAddr"></p>
+  <p class="mt-4 text-xs text-[#faf6f0]/35">Built by Ficworks — your menu, editable in seconds.</p>
+</footer>
+
+<script>
+  const wa = CONTENT.whatsapp.replace(/[^0-9]/g,'');
+  const orderUrl = (item) => "https://wa.me/" + wa + "?text=" + encodeURIComponent("Halo " + CONTENT.cafeName + "! Saya mau pesan: " + (item || ""));
+  const $ = id => document.getElementById(id);
+
+  $('navName').textContent = $('footName').textContent = $('heroName').textContent = CONTENT.cafeName;
+  $('heroTag').textContent = CONTENT.tagline;
+  $('about').textContent = CONTENT.about;
+  $('visitAddr').textContent = $('footAddr').textContent = CONTENT.address;
+  $('visitHours').textContent = CONTENT.hours;
+  $('heroImg').src = CONTENT.heroImg;
+  $('navOrder').href = orderUrl("");
+  const ob = $('orderBtn'); ob.href = orderUrl(""); ob.innerHTML = 'Order on WhatsApp';
+  try { new QRCode($('qr'), { text:"https://kopisenja.example/menu", width:170, height:170, colorDark:"#2b211a", colorLight:"#faf6f0" }); } catch(e){}
+
+  const featSvg = [
+    '<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c4 3 4 9 0 18-4-9-4-15 0-18z"/></svg>',
+    '<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2 3-1 4 0 7 2-1 3-3 3-3 2 3 2 6 2 7a5 5 0 1 1-10 0c0-2 1-4 2-5 1 2 3 2 3-1 0-2-2-3-2-5z"/></svg>',
+    '<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8h12v4a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8zM16 9h2a2 2 0 0 1 0 4h-2M6 3v2M10 3v2M14 3v2"/></svg>'
+  ];
+  const feats = [["Single-origin beans","Sourced from small farms."],["Roasted in small batches","Fresh every week."],["Made slow, with care","No rush, ever."]];
+  $('features').innerHTML = feats.map((f,i)=>`<div class="flex gap-4"><div class="text-[#b9774e] mt-0.5">${featSvg[i]}</div><div><div class="font-medium text-[#2b211a]">${f[0]}</div><div class="text-sm text-[#2b211a]/55">${f[1]}</div></div></div>`).join('');
+
+  $('signatures').innerHTML = CONTENT.signatures.map(s=>`
+    <a href="${orderUrl(s.name)}" target="_blank" class="group block bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <div class="photo h-56 overflow-hidden"><img src="${s.img}" onerror="this.style.display='none'" class="group-hover:scale-105 transition duration-700"></div>
+      <div class="p-6"><div class="flex items-baseline justify-between mb-1"><h3 class="serif text-2xl text-[#2b211a]">${s.name}</h3><span class="text-[#b9774e] font-medium">Rp ${s.price}</span></div><p class="text-sm text-[#2b211a]/55">${s.desc}</p></div>
+    </a>`).join('');
+
+  $('menuList').innerHTML = CONTENT.menu.map(g=>`
+    <div>
+      <h3 class="serif text-2xl text-[#b9774e] mb-6">${g.cat}</h3>
+      <div class="space-y-5">
+        ${g.items.map(it=>`<a href="${orderUrl(it.name)}" target="_blank" class="flex items-baseline gap-4 group">
+          <span class="font-medium text-[#2b211a] group-hover:text-[#b9774e] transition">${it.name}</span>
+          <span class="flex-1 border-b border-dotted border-[#2b211a]/20"></span>
+          <span class="text-[#6f4a2f] whitespace-nowrap">Rp ${it.price}</span></a>`).join('')}
+      </div>
+    </div>`).join('');
+
+  // gentle scroll reveal
+  const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }), {threshold:.15});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Amara Ubud — Boutique Hotel</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family:'Plus Jakarta Sans', -apple-system, system-ui, sans-serif; }
+  html { scroll-behavior:smooth; }
+  .photo { background:#f2f2f2; } .photo img { width:100%; height:100%; object-fit:cover; }
+  .card { transition: box-shadow .25s ease, transform .25s ease; }
+  .card:hover { box-shadow: rgba(0,0,0,0.04) 0 2px 6px 0, rgba(0,0,0,0.12) 0 8px 24px 0; transform: translateY(-3px); }
+  .reveal { opacity:0; transform:translateY(20px); transition:.6s ease; } .reveal.in { opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){ .reveal{opacity:1;transform:none} }
+</style>
+</head>
+<body class="bg-white text-[#222222]">
+
+<!-- ↓ EDIT HERE: rooms, prices, photos, details ↓ -->
+<script>
+const CONTENT = {
+  name:"Amara Ubud", tagline:"A boutique retreat in the heart of Bali.",
+  location:"Ubud, Bali", rating:"4.92", reviews:"184",
+  heroImg:"https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1920&auto=format&fit=crop",
+  whatsapp:"+62 812 0000 0000", address:"Jl. Raya Ubud, Gianyar, Bali",
+  rooms:[
+    { name:"Garden Suite", price:"1.850.000", desc:"King bed, private terrace over the koi garden.", img:"https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=900&auto=format&fit=crop" },
+    { name:"Jungle Villa", price:"2.700.000", desc:"Plunge pool, outdoor stone bath, valley views.", img:"https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=900&auto=format&fit=crop" },
+    { name:"Riverside Pavilion", price:"3.400.000", desc:"Two levels, river deck, breakfast for two.", img:"https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=900&auto=format&fit=crop" }
+  ],
+  amenities:["Spring-fed infinity pool","Spa & yoga shala","Farm-to-table dining","Rice-terrace walks","Airport transfer","Fast fibre wifi"]
+};
+</script>
+
+<!-- NAV -->
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-[#ebebeb] px-6 md:px-12 h-20 flex items-center justify-between">
+  <div class="text-2xl font-extrabold tracking-tight text-[#ff385c]" id="nm"></div>
+  <nav class="hidden md:flex gap-8 text-[15px] font-semibold text-[#222]">
+    <a href="#rooms" class="hover:text-[#ff385c] transition">Rooms</a>
+    <a href="#amenities" class="hover:text-[#ff385c] transition">The Stay</a>
+    <a href="#book" class="hover:text-[#ff385c] transition">Contact</a>
+  </nav>
+  <a id="navBook" href="#" class="bg-[#ff385c] hover:bg-[#e00b41] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition">Book now</a>
+</header>
+
+<!-- HERO -->
+<section class="px-6 md:px-12 pt-10 max-w-6xl mx-auto">
+  <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+    <div>
+      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight" id="hn"></h1>
+      <p class="text-[#6a6a6a] mt-2" id="hloc"></p>
+    </div>
+    <div class="flex items-center gap-1.5 text-[15px] font-semibold">
+      <svg class="w-4 h-4 text-[#222]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+      <span id="hrate"></span><span class="text-[#6a6a6a] font-normal" id="hrev"></span>
+    </div>
+  </div>
+  <div class="photo rounded-3xl overflow-hidden aspect-[16/9] md:aspect-[21/9]"><img id="hero" alt="" onerror="this.style.display='none'" /></div>
+  <p class="text-xl md:text-2xl text-[#222] mt-8 max-w-2xl font-medium" id="htag"></p>
+</section>
+
+<!-- ROOMS -->
+<section id="rooms" class="px-6 md:px-12 py-20 max-w-6xl mx-auto">
+  <h2 class="text-2xl md:text-3xl font-bold mb-1">Rooms & suites</h2>
+  <p class="text-[#6a6a6a] mb-8">Tap a room to book on WhatsApp.</p>
+  <div id="roomGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+</section>
+
+<!-- AMENITIES -->
+<section id="amenities" class="px-6 md:px-12 py-16 bg-[#f7f7f7]">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-2xl md:text-3xl font-bold mb-8 reveal">Everything taken care of</h2>
+    <div id="amen" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5 reveal"></div>
+  </div>
+</section>
+
+<!-- BOOK -->
+<section id="book" class="px-6 md:px-12 py-24 max-w-3xl mx-auto text-center">
+  <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">Your Bali escape awaits</h2>
+  <p class="text-[#6a6a6a] mb-3" id="baddr"></p>
+  <p class="text-[#222] font-semibold mb-8" id="bfrom"></p>
+  <a id="bookBtn" href="#" class="inline-block bg-[#ff385c] hover:bg-[#e00b41] text-white font-semibold px-9 py-4 rounded-full transition"></a>
+</section>
+
+<footer class="border-t border-[#ebebeb] px-6 md:px-12 py-10 text-center text-sm text-[#6a6a6a]">
+  <div class="text-xl font-extrabold text-[#ff385c] mb-1" id="fn"></div>
+  <p id="faddr"></p>
+  <p class="mt-3 text-xs text-[#929292]">Built by Ficworks</p>
+</footer>
+
+<script>
+  const wa = CONTENT.whatsapp.replace(/[^0-9]/g,'');
+  const book = r => "https://wa.me/" + wa + "?text=" + encodeURIComponent("Hi " + CONTENT.name + "! I'd like to book: " + (r || "a room"));
+  const $ = id => document.getElementById(id);
+  nm.textContent = fn.textContent = hn.textContent = CONTENT.name;
+  hloc.textContent = CONTENT.location; htag.textContent = CONTENT.tagline;
+  hrate.textContent = CONTENT.rating; hrev.textContent = " · " + CONTENT.reviews + " reviews";
+  hero.src = CONTENT.heroImg; baddr.textContent = faddr.textContent = CONTENT.address;
+  bfrom.textContent = "From Rp " + CONTENT.rooms[0].price + " / night";
+  navBook.href = book(""); const bb = $('bookBtn'); bb.href = book(""); bb.textContent = "Book on WhatsApp";
+
+  $('roomGrid').innerHTML = CONTENT.rooms.map(r => `
+    <a href="${book(r.name)}" target="_blank" class="card block rounded-2xl overflow-hidden bg-white border border-[#ebebeb]">
+      <div class="photo aspect-[4/3] overflow-hidden"><img src="${r.img}" onerror="this.style.display='none'" class="hover:scale-105 transition duration-500"></div>
+      <div class="p-5">
+        <div class="flex items-baseline justify-between"><h3 class="font-bold text-[17px]">${r.name}</h3><span class="font-semibold text-[15px]">Rp ${r.price}</span></div>
+        <p class="text-[#6a6a6a] text-sm mt-1.5">${r.desc}</p>
+        <p class="text-[#929292] text-xs mt-1">per night</p>
+      </div>
+    </a>`).join('');
+
+  $('amen').innerHTML = CONTENT.amenities.map(a => `
+    <div class="flex items-center gap-3 text-[15px]">
+      <svg class="w-5 h-5 text-[#ff385c] shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+      <span>${a}</span>
+    </div>`).join('');
+
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold:.15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
