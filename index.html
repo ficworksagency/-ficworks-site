@@ -617,11 +617,12 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
   </div>
 </section>
 
-<!-- TEAM (original grid — shows all 7, no scroll) -->
+<!-- TEAM (horizontal slide) -->
 <section id="team" class="px-6 md:px-12 py-16 max-w-6xl mx-auto">
   <h2 id="teamH" class="display text-4xl md:text-5xl font-bold tracking-tight text-center mb-3"></h2>
-  <p id="teamSub" class="text-white/50 text-center mb-14 max-w-2xl mx-auto"></p>
-  <div id="agentGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  <p id="teamSub" class="text-white/50 text-center mb-10 max-w-2xl mx-auto"></p>
+  <div id="agentGrid" data-lenis-prevent class="no-bar flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory cursor-grab"></div>
+  <p class="text-center text-white/30 text-xs mt-5 tracking-[0.2em] uppercase">←&nbsp;&nbsp;drag · swipe&nbsp;&nbsp;→</p>
 </section>
 
 <!-- DETAIL MODAL (reused: service details + more) -->
@@ -901,7 +902,7 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
     $('withList').innerHTML    = t.with.map(x => `<li class="flex gap-3"><span class="text-[#34d399]">✓</span> ${x}</li>`).join('');
 
     $('agentGrid').innerHTML = VISUAL.agents.map((a,i) => `
-      <div class="agent-card rounded-3xl p-6 bg-[#0f1115] border border-white/5 hover:border-white/15 hover:shadow-2xl hover:shadow-black/40 transition-all duration-200" style="--c:${a.c};--d:${(i*0.12).toFixed(2)}s">
+      <div class="agent-card snap-start shrink-0 w-[280px] sm:w-[320px] rounded-3xl p-6 bg-[#0f1115] border border-white/5 hover:border-white/15 hover:shadow-2xl hover:shadow-black/40 transition-all duration-200" style="--c:${a.c};--d:${(i*0.12).toFixed(2)}s">
         <div class="slot rounded-2xl aspect-square mb-5 glow" style="--c:${a.c}" onmouseenter="playWave(this)" onmouseleave="stopWave(this)">
           <img class="charimg" style="--delay:${(i*0.45).toFixed(2)}s;--dur:${(3.6+(i%3)*0.7).toFixed(2)}s" src="${a.img}" alt="${a.name}" onerror="this.style.display='none'" />
           <video class="wave" muted loop playsinline preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:3;opacity:0;transition:opacity .25s"><source src="${a.img.replace('.png','-wave.mp4')}" type="video/mp4"></video>
@@ -1046,6 +1047,16 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
     openModal('detailModal');
   });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModals(); });
+
+  // Team horizontal slide — drag + mouse-wheel + native swipe
+  const strip=document.getElementById('agentGrid');
+  if (strip){
+    let down=false,sx=0,sl=0;
+    strip.addEventListener('mousedown', e=>{ down=true; sx=e.pageX; sl=strip.scrollLeft; strip.classList.add('grabbing'); });
+    window.addEventListener('mouseup', ()=>{ down=false; strip.classList.remove('grabbing'); });
+    strip.addEventListener('mousemove', e=>{ if(!down) return; e.preventDefault(); strip.scrollLeft=sl-(e.pageX-sx); });
+    strip.addEventListener('wheel', e=>{ if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){ strip.scrollLeft += e.deltaY; e.preventDefault(); } }, {passive:false});
+  }
 })();
 </script>
 </body>
