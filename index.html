@@ -39,9 +39,47 @@
   .pop.in { animation: greet .7s cubic-bezier(.2,.85,.3,1.5) forwards; animation-delay: var(--d,0s); }
   @keyframes greet { 0%{ opacity:0; transform: translateY(30px) scale(.9) } 55%{ opacity:1 } 100%{ opacity:1; transform: translateY(0) scale(1) } }
   @media (prefers-reduced-motion: reduce) { .agent-card, .pop { opacity:1; transform:none } .agent-card.in, .pop.in { animation:none } }
+
+  /* ============ PREMIUM MOTION LAYER ============ */
+  html.lenis, html.lenis body { height:auto; }
+  .lenis.lenis-smooth { scroll-behavior:auto !important; }
+  .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior:contain; }
+  .lenis.lenis-stopped { overflow:hidden; }
+
+  #scroll-progress { position:fixed; top:0; left:0; height:2px; width:0; z-index:60; background:linear-gradient(90deg,#eab308,#f59e0b,#eab308); box-shadow:0 0 12px rgba(234,179,8,.7); }
+
+  #cursor-glow { position:fixed; top:0; left:0; width:420px; height:420px; margin:-210px 0 0 -210px; border-radius:50%; pointer-events:none; z-index:55; background:radial-gradient(circle, rgba(234,179,8,.10), transparent 60%); mix-blend-mode:screen; opacity:0; transition:opacity .35s ease; will-change:transform; }
+  @media (hover:hover) and (pointer:fine){ #cursor-glow.on { opacity:1; } }
+
+  #aurora { position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; }
+  #aurora span { position:absolute; display:block; width:48vw; height:48vw; border-radius:50%; filter:blur(90px); opacity:.16; will-change:transform; }
+  #aurora .a1 { background:#eab308; top:-12%; left:-6%; animation:floatA 24s ease-in-out infinite; }
+  #aurora .a2 { background:#a78bfa; bottom:-18%; right:-8%; animation:floatB 30s ease-in-out infinite; }
+  #aurora .a3 { background:#22d3ee; top:42%; left:58%; opacity:.10; animation:floatA 34s ease-in-out infinite reverse; }
+  @keyframes floatA { 0%,100%{ transform:translate(0,0) scale(1);} 50%{ transform:translate(6%,9%) scale(1.18);} }
+  @keyframes floatB { 0%,100%{ transform:translate(0,0) scale(1);} 50%{ transform:translate(-8%,-7%) scale(1.12);} }
+
+  .shimmer { background:linear-gradient(100deg,#ffffff 18%,#fde68a 38%,#ffffff 58%,#ffffff 80%); background-size:200% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; animation:shimmer 6.5s linear infinite; }
+  @keyframes shimmer { to { background-position:-200% center; } }
+
+  .marquee { display:flex; overflow:hidden; user-select:none; -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent); mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent); }
+  .marquee__t { display:flex; flex-shrink:0; align-items:center; gap:2.5rem; padding-right:2.5rem; animation:scrollX 30s linear infinite; }
+  @keyframes scrollX { to { transform:translateX(-100%); } }
+  .marquee:hover .marquee__t { animation-play-state:paused; }
+
+  .btn-shine { position:relative; overflow:hidden; will-change:transform; }
+  .btn-shine::after { content:""; position:absolute; top:0; left:-130%; width:55%; height:100%; background:linear-gradient(110deg,transparent,rgba(255,255,255,.4),transparent); transform:skewX(-20deg); }
+  .btn-shine:hover::after { animation:shine .85s ease; }
+  @keyframes shine { to { left:140%; } }
+
+  @media (prefers-reduced-motion:reduce){ #aurora span, .shimmer, .marquee__t { animation:none; } }
 </style>
 </head>
 <body class="bg-[#08090c] text-[#f7f8f8]">
+
+<div id="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+<div id="scroll-progress"></div>
+<div id="cursor-glow" aria-hidden="true"></div>
 
 <!-- ============================================================= -->
 <!--  FIXED VISUALS (colours, emojis, images) — not language       -->
@@ -429,6 +467,9 @@ LANG.km.alacarte.steps = [
   {n:"២", t:"ផ្ដល់ព័ត៌មាន", d:"ជជែកខ្លីៗដើម្បីឱ្យត្រឹមត្រូវ៖ អាជីវកម្ម តំណ និងគោលដៅរបស់អ្នក។"},
   {n:"៣", t:"ភ្នាក់ងារ + អ្នកជំនាញ", d:"ភ្នាក់ងារ AI ត្រឹមត្រូវធ្វើការ ហើយមនុស្សពិតពិនិត្យគ្រប់ផ្នែកមុនពេលដល់អ្នក។"},
   {n:"៤", t:"ប្រគល់រហ័ស", d:"អ្នកទទួលបានរួចរាល់ ជាធម្មតាក្នុង ១-៣ ថ្ងៃ។"} ];
+LANG.en.alacarte.pay = "Easy, secure payment — DuitNow, KHQR, or card. Prices in USD; pay in your local currency too.";
+LANG.id.alacarte.pay = "Pembayaran mudah & aman — DuitNow, KHQR, atau kartu. Harga dalam USD; bisa bayar dengan mata uang lokal Anda.";
+LANG.km.alacarte.pay = "ការទូទាត់ងាយស្រួល & មានសុវត្ថិភាព — KHQR, DuitNow ឬកាត។ តម្លៃជា USD អាចបង់ជារូបិយប័ណ្ណក្នុងស្រុក។";
 LANG.en.why = { h:"Anyone can use AI. We use it like experts.", sub:"ChatGPT and template builders give you generic output. We give you a real team, real design, and real results.", items:[
   {t:"Brand-grade, not template", d:"Built on the design systems behind the world's biggest brands. Never generic AI slop."},
   {t:"Experts, not prompts", d:"A 7-specialist team who know what actually ranks, converts, and sells. You don't lift a finger or write a single prompt."},
@@ -454,7 +495,7 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
   </nav>
   <div class="flex items-center gap-4">
     <div id="langSwitch" class="flex gap-2 text-xs font-semibold"></div>
-    <a href="#contact" id="navCta" class="bg-white text-[#0c1117] px-5 py-2 rounded-full text-sm font-semibold hover:bg-[#eab308] transition"></a>
+    <a href="#contact" id="navCta" data-magnetic class="btn-shine bg-white text-[#0c1117] px-5 py-2 rounded-full text-sm font-semibold hover:bg-[#eab308] transition"></a>
   </div>
 </header>
 
@@ -465,8 +506,11 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
     <div class="absolute top-44 left-1/4 w-[26rem] h-[26rem] rounded-full bg-[#22d3ee]/10 blur-[130px]"></div>
   </div>
   <p id="heroEyebrow" class="inline-block border border-white/15 rounded-full px-4 py-1.5 text-xs text-white/60 mb-8 backdrop-blur"></p>
-  <h1 id="heroH" class="display text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight mb-7 bg-gradient-to-b from-white to-white/55 bg-clip-text text-transparent"></h1>
-  <p id="heroSub" class="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-12 leading-relaxed"></p>
+  <h1 id="heroH" class="shimmer display text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight mb-7"></h1>
+  <p id="heroSub" class="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-9 leading-relaxed"></p>
+  <div class="flex justify-center mb-12">
+    <a href="#contact" id="heroCtaA" data-magnetic class="btn-shine inline-flex items-center gap-2 bg-[#eab308] text-[#0c1117] px-8 py-4 rounded-full text-sm font-bold hover:bg-[#f59e0b] transition shadow-xl shadow-[#eab308]/25"></a>
+  </div>
   <div class="slot rounded-3xl border border-white/10 aspect-[16/9] max-w-5xl mx-auto glow ring-1 ring-white/10" style="--c:#eab308">
     <video class="heroimg" autoplay loop muted playsinline poster="characters/hq-scene.png"
            style="width:100%;height:100%;object-fit:cover;position:relative;z-index:2">
@@ -478,6 +522,18 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
     </div>
   </div>
 </section>
+
+<!-- MARQUEE -->
+<div class="border-y border-white/5 py-5 overflow-hidden bg-[#0c1117]/30">
+  <div class="marquee">
+    <div class="marquee__t display text-2xl md:text-3xl font-semibold tracking-tight text-white/[0.13] whitespace-nowrap">
+      <span>Websites that sell</span><span class="text-[#eab308]/50">✦</span><span>SEO</span><span class="text-[#eab308]/50">✦</span><span>Ads that convert</span><span class="text-[#eab308]/50">✦</span><span>Content</span><span class="text-[#eab308]/50">✦</span><span>Competitor intel</span><span class="text-[#eab308]/50">✦</span><span>Online stores</span><span class="text-[#eab308]/50">✦</span><span>AI videos</span><span class="text-[#eab308]/50">✦</span><span>Social</span><span class="text-[#eab308]/50">✦</span>
+    </div>
+    <div class="marquee__t display text-2xl md:text-3xl font-semibold tracking-tight text-white/[0.13] whitespace-nowrap" aria-hidden="true">
+      <span>Websites that sell</span><span class="text-[#eab308]/50">✦</span><span>SEO</span><span class="text-[#eab308]/50">✦</span><span>Ads that convert</span><span class="text-[#eab308]/50">✦</span><span>Content</span><span class="text-[#eab308]/50">✦</span><span>Competitor intel</span><span class="text-[#eab308]/50">✦</span><span>Online stores</span><span class="text-[#eab308]/50">✦</span><span>AI videos</span><span class="text-[#eab308]/50">✦</span><span>Social</span><span class="text-[#eab308]/50">✦</span>
+    </div>
+  </div>
+</div>
 
 <!-- TRUST -->
 <section class="px-6 md:px-12 pb-10 max-w-6xl mx-auto">
@@ -577,6 +633,7 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
     <div id="acSteps" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
   </div>
   <div id="acGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+  <p id="acPay" class="text-center text-sm text-white/40 mt-10"></p>
 </section>
 
 <!-- FAQ -->
@@ -681,6 +738,8 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
         <a href="${acUrl(s.name)}" target="_blank" class="block text-center bg-white/10 hover:bg-white/20 text-white rounded-full py-2.5 text-sm font-semibold transition">${t.alacarte.cta}</a>
       </div>`).join('');
 
+    $('acPay').textContent = t.alacarte.pay;
+
     $('whyH').textContent = t.why.h;
     $('whySub').textContent = t.why.sub;
     const whyIcons = [
@@ -756,6 +815,7 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
     $('heroEyebrow').textContent = t.hero_eyebrow;
     $('heroH').textContent = t.hero_h;
     $('heroSub').textContent = t.hero_sub;
+    $('heroCtaA').textContent = t.cta_nav;
     $('gapEyebrow').textContent = t.gap_eyebrow;
     $('gapH').textContent = t.gap_h;
     $('gapSub').textContent = t.gap_sub;
@@ -855,6 +915,40 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
     if (revealObs) els.forEach(c => revealObs.observe(c)); else els.forEach(c => c.classList.add('in'));
   }
   renderLang();
+</script>
+
+<!-- ============ PREMIUM MOTION LAYER ============ -->
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+<script>
+(function(){
+  const bar = document.getElementById('scroll-progress');
+  function progress(){ const h=document.documentElement; const max=h.scrollHeight-h.clientHeight; const y=window.scrollY||h.scrollTop; if(bar) bar.style.width=(max>0?(y/max*100):0)+'%'; }
+
+  // Smooth scrolling (Lenis) with graceful fallback
+  if (window.Lenis){
+    const lenis = new Lenis({ duration:1.15, smoothWheel:true });
+    function raf(t){ lenis.raf(t); requestAnimationFrame(raf); } requestAnimationFrame(raf);
+    lenis.on('scroll', progress);
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', e=>{ const id=a.getAttribute('href'); if(id.length>1 && document.querySelector(id)){ e.preventDefault(); lenis.scrollTo(id,{offset:-10}); } });
+    });
+  }
+  window.addEventListener('scroll', progress, {passive:true}); progress();
+
+  // Cursor spotlight (desktop only)
+  const glow=document.getElementById('cursor-glow');
+  if (glow && matchMedia('(hover:hover) and (pointer:fine)').matches){
+    window.addEventListener('mousemove', e=>{ glow.classList.add('on'); glow.style.transform='translate('+e.clientX+'px,'+e.clientY+'px)'; }, {passive:true});
+    document.addEventListener('mouseleave', ()=> glow.classList.remove('on'));
+  }
+
+  // Magnetic buttons
+  document.querySelectorAll('[data-magnetic]').forEach(b=>{
+    b.style.transition='transform .25s cubic-bezier(.2,.8,.2,1)';
+    b.addEventListener('mousemove', e=>{ const r=b.getBoundingClientRect(); b.style.transform='translate('+(e.clientX-r.left-r.width/2)*0.3+'px,'+(e.clientY-r.top-r.height/2)*0.45+'px)'; });
+    b.addEventListener('mouseleave', ()=> b.style.transform='');
+  });
+})();
 </script>
 </body>
 </html>

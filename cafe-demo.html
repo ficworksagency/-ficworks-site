@@ -8,22 +8,42 @@
 <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- Animation libraries (free, CDN) -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" rel="stylesheet">
 <style>
   body { font-family:'Inter',sans-serif; }
   .serif { font-family:'Fraunces',serif; }
-  html { scroll-behavior:smooth; }
   .photo { background:linear-gradient(135deg,#6f4a2f,#8a5a37); }
   .photo img { width:100%; height:100%; object-fit:cover; }
-  .reveal { opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease; }
-  .reveal.in { opacity:1; transform:none; }
-  @media (prefers-reduced-motion:reduce){ .reveal{opacity:1;transform:none} }
+
+  /* hero entrance + subtle ken-burns */
+  @keyframes heroUp { from{opacity:0; transform:translateY(34px);} to{opacity:1; transform:none;} }
+  .hero-anim { opacity:0; animation:heroUp 1s cubic-bezier(.2,.7,.2,1) forwards; }
+  @keyframes kb { from{transform:scale(1.1);} to{transform:scale(1);} }
+  #heroImg { animation:kb 9s ease-out forwards; }
+  @keyframes bounce { 0%,100%{transform:translate(-50%,0);} 50%{transform:translate(-50%,8px);} }
+  .scroll-cue { animation:bounce 2s ease-in-out infinite; }
+
+  /* nav state */
+  #nav { transition:background-color .4s ease, box-shadow .4s ease; }
+  #nav.solid { background:rgba(28,20,14,.82); backdrop-filter:blur(12px); box-shadow:0 1px 0 rgba(255,255,255,.06); }
+
+  /* Lenis smooth scroll */
+  html.lenis, html.lenis body { height:auto; }
+  .lenis.lenis-smooth { scroll-behavior:auto !important; }
+  .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior:contain; }
+  .lenis.lenis-stopped { overflow:hidden; }
+
+  .swiper-pagination-bullet-active { background:#b9774e !important; }
+  @media (prefers-reduced-motion:reduce){ .hero-anim,#heroImg,.scroll-cue{animation:none;opacity:1;} }
 </style>
 </head>
 <body class="bg-[#faf6f0] text-[#2b211a] antialiased">
 
 <!-- ============================================================= -->
 <!--  ↓↓↓  THE ONLY PART THE OWNER EVER EDITS  ↓↓↓                 -->
-<!--  Change prices, add items, mark sold out — in seconds.        -->
+<!--  Change prices, add items, swap photos — in seconds.          -->
 <!-- ============================================================= -->
 <script>
 const CONTENT = {
@@ -37,6 +57,13 @@ const CONTENT = {
   signatures: [
     { name:"Kopi Susu Senja", price:"25.000", desc:"Our signature palm-sugar latte.", img:"https://images.unsplash.com/photo-1561882468-9110e03e0f78?q=80&w=900&auto=format&fit=crop" },
     { name:"Es Kopi Aren",    price:"26.000", desc:"Iced espresso, aren sugar, fresh milk.", img:"https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?q=80&w=900&auto=format&fit=crop" }
+  ],
+  gallery: [
+    "https://images.unsplash.com/photo-1453614512568-c4024d13c247?q=80&w=1200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1442512595331-e89e73853f31?q=80&w=1200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=1200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=1200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1200&auto=format&fit=crop"
   ],
   menu: [
     { cat:"Coffee", items:[
@@ -52,46 +79,57 @@ const CONTENT = {
 <!-- ============================================================= -->
 
 <!-- NAV -->
-<header class="fixed w-full z-50 top-0 px-6 md:px-12 py-5 flex items-center justify-between text-[#faf6f0]">
+<header id="nav" class="fixed w-full z-50 top-0 px-6 md:px-12 py-5 flex items-center justify-between text-[#faf6f0]">
   <div class="serif text-2xl tracking-tight" id="navName"></div>
   <nav class="hidden md:flex gap-8 text-sm font-light tracking-wide">
     <a href="#menu" class="hover:opacity-70 transition">Menu</a>
+    <a href="#space" class="hover:opacity-70 transition">The space</a>
     <a href="#visit" class="hover:opacity-70 transition">Visit</a>
   </nav>
   <a id="navOrder" href="#" class="border border-[#faf6f0]/40 rounded-full px-5 py-2 text-xs tracking-widest uppercase hover:bg-[#faf6f0] hover:text-[#2b211a] transition">Order</a>
 </header>
 
 <!-- HERO -->
-<section class="relative h-screen photo flex items-end">
+<section class="relative h-screen photo flex items-end overflow-hidden">
   <img id="heroImg" alt="" onerror="this.style.display='none'" />
   <div class="absolute inset-0 bg-gradient-to-t from-[#1c140e] via-[#1c140e]/35 to-[#1c140e]/30"></div>
   <div class="relative z-10 px-6 md:px-12 pb-24 max-w-2xl text-[#faf6f0]">
-    <p class="uppercase tracking-[0.35em] text-[11px] text-[#e6b87f] mb-6">Coffee House · Jakarta</p>
-    <h1 id="heroName" class="serif text-6xl md:text-8xl leading-[0.95] mb-6 font-medium"></h1>
-    <p id="heroTag" class="text-lg md:text-xl font-light text-[#faf6f0]/85 max-w-md"></p>
+    <p class="hero-anim uppercase tracking-[0.35em] text-[11px] text-[#e6b87f] mb-6" style="animation-delay:.1s">Coffee House · Jakarta</p>
+    <h1 id="heroName" class="hero-anim serif text-6xl md:text-8xl leading-[0.95] mb-6 font-medium" style="animation-delay:.25s"></h1>
+    <p id="heroTag" class="hero-anim text-lg md:text-xl font-light text-[#faf6f0]/85 max-w-md" style="animation-delay:.45s"></p>
   </div>
-  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-[#faf6f0]/50 text-xs tracking-widest uppercase">Scroll</div>
+  <div class="scroll-cue absolute bottom-8 left-1/2 text-[#faf6f0]/50 text-xs tracking-widest uppercase">Scroll</div>
 </section>
 
 <!-- ABOUT + FEATURES -->
 <section class="px-6 md:px-12 py-28 max-w-5xl mx-auto">
   <div class="grid md:grid-cols-5 gap-12 items-center">
-    <p id="about" class="reveal md:col-span-3 serif text-3xl md:text-4xl leading-snug text-[#6f4a2f]"></p>
-    <div id="features" class="reveal md:col-span-2 space-y-6"></div>
+    <p id="about" data-aos="fade-up" class="md:col-span-3 serif text-3xl md:text-4xl leading-snug text-[#6f4a2f]"></p>
+    <div id="features" class="md:col-span-2 space-y-6"></div>
   </div>
 </section>
 
 <!-- SIGNATURES -->
 <section class="px-6 md:px-12 pb-12 max-w-5xl mx-auto">
-  <p class="uppercase tracking-[0.3em] text-[11px] text-[#b9774e] mb-8 text-center">House favourites</p>
+  <p data-aos="fade-up" class="uppercase tracking-[0.3em] text-[11px] text-[#b9774e] mb-8 text-center">House favourites</p>
   <div id="signatures" class="grid sm:grid-cols-2 gap-8"></div>
+</section>
+
+<!-- GALLERY (Swiper) -->
+<section id="space" class="px-6 md:px-12 py-24 bg-[#f3ece2]">
+  <p data-aos="fade-up" class="uppercase tracking-[0.3em] text-[11px] text-[#b9774e] mb-3 text-center">The space</p>
+  <h2 data-aos="fade-up" class="serif text-4xl md:text-5xl text-[#2b211a] text-center mb-12">Made for lingering</h2>
+  <div data-aos="fade-up" class="swiper gallerySwiper max-w-5xl mx-auto pb-12">
+    <div class="swiper-wrapper" id="gallerySlides"></div>
+    <div class="swiper-pagination"></div>
+  </div>
 </section>
 
 <!-- MENU -->
 <section id="menu" class="px-6 md:px-12 py-28 max-w-3xl mx-auto">
   <div class="text-center mb-16">
-    <h2 class="serif text-5xl md:text-6xl text-[#2b211a] mb-4">The Menu</h2>
-    <p class="text-[#2b211a]/50 text-sm">Tap any item to order on WhatsApp</p>
+    <h2 data-aos="fade-up" class="serif text-5xl md:text-6xl text-[#2b211a] mb-4">The Menu</h2>
+    <p data-aos="fade-up" class="text-[#2b211a]/50 text-sm">Tap any item to order on WhatsApp</p>
   </div>
   <div id="menuList" class="space-y-14"></div>
 </section>
@@ -99,21 +137,21 @@ const CONTENT = {
 <!-- QR -->
 <section class="px-6 md:px-12 py-24 bg-[#2b211a] text-[#faf6f0]">
   <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-    <div>
+    <div data-aos="fade-up">
       <p class="uppercase tracking-[0.3em] text-[11px] text-[#e6b87f] mb-4">At the table</p>
       <h2 class="serif text-4xl md:text-5xl mb-5 leading-tight">Scan, browse, order.</h2>
       <p class="text-[#faf6f0]/70 leading-relaxed">Place this QR on every table. Guests scan it, see the live menu on their phone, and order — no app, no paper, no waiting.</p>
     </div>
-    <div class="flex justify-center"><div class="bg-[#faf6f0] p-5 rounded-3xl"><div id="qr"></div></div></div>
+    <div data-aos="fade-up" data-aos-delay="100" class="flex justify-center"><div class="bg-[#faf6f0] p-5 rounded-3xl"><div id="qr"></div></div></div>
   </div>
 </section>
 
 <!-- VISIT -->
 <section id="visit" class="px-6 md:px-12 py-28 max-w-3xl mx-auto text-center">
-  <h2 class="serif text-5xl text-[#6f4a2f] mb-8">Come say hi</h2>
-  <p id="visitAddr" class="text-xl text-[#2b211a]/80"></p>
-  <p id="visitHours" class="text-[#2b211a]/50 mt-2 mb-10"></p>
-  <a id="orderBtn" href="#" class="inline-flex items-center gap-2 bg-[#2b211a] text-[#faf6f0] px-9 py-4 rounded-full text-sm tracking-wide hover:bg-[#b9774e] transition"></a>
+  <h2 data-aos="fade-up" class="serif text-5xl text-[#6f4a2f] mb-8">Come say hi</h2>
+  <p id="visitAddr" data-aos="fade-up" class="text-xl text-[#2b211a]/80"></p>
+  <p id="visitHours" data-aos="fade-up" class="text-[#2b211a]/50 mt-2 mb-10"></p>
+  <a id="orderBtn" data-aos="fade-up" href="#" class="inline-flex items-center gap-2 bg-[#2b211a] text-[#faf6f0] px-9 py-4 rounded-full text-sm tracking-wide hover:bg-[#b9774e] transition"></a>
 </section>
 
 <footer class="bg-[#1c140e] text-[#faf6f0]/55 px-6 md:px-12 py-12 text-center text-sm">
@@ -121,6 +159,11 @@ const CONTENT = {
   <p id="footAddr"></p>
   <p class="mt-4 text-xs text-[#faf6f0]/35">Built by Ficworks — your menu, editable in seconds.</p>
 </footer>
+
+<!-- Animation libraries (free, CDN) -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 
 <script>
   const wa = CONTENT.whatsapp.replace(/[^0-9]/g,'');
@@ -143,16 +186,19 @@ const CONTENT = {
     '<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8h12v4a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8zM16 9h2a2 2 0 0 1 0 4h-2M6 3v2M10 3v2M14 3v2"/></svg>'
   ];
   const feats = [["Single-origin beans","Sourced from small farms."],["Roasted in small batches","Fresh every week."],["Made slow, with care","No rush, ever."]];
-  $('features').innerHTML = feats.map((f,i)=>`<div class="flex gap-4"><div class="text-[#b9774e] mt-0.5">${featSvg[i]}</div><div><div class="font-medium text-[#2b211a]">${f[0]}</div><div class="text-sm text-[#2b211a]/55">${f[1]}</div></div></div>`).join('');
+  $('features').innerHTML = feats.map((f,i)=>`<div class="flex gap-4" data-aos="fade-up" data-aos-delay="${i*100}"><div class="text-[#b9774e] mt-0.5">${featSvg[i]}</div><div><div class="font-medium text-[#2b211a]">${f[0]}</div><div class="text-sm text-[#2b211a]/55">${f[1]}</div></div></div>`).join('');
 
-  $('signatures').innerHTML = CONTENT.signatures.map(s=>`
-    <a href="${orderUrl(s.name)}" target="_blank" class="group block bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-      <div class="photo h-56 overflow-hidden"><img src="${s.img}" onerror="this.style.display='none'" class="group-hover:scale-105 transition duration-700"></div>
+  $('signatures').innerHTML = CONTENT.signatures.map((s,i)=>`
+    <a href="${orderUrl(s.name)}" target="_blank" data-aos="fade-up" data-aos-delay="${i*100}" class="group block bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <div class="photo h-56 overflow-hidden"><img src="${s.img}" loading="lazy" onerror="this.style.display='none'" class="group-hover:scale-105 transition duration-700"></div>
       <div class="p-6"><div class="flex items-baseline justify-between mb-1"><h3 class="serif text-2xl text-[#2b211a]">${s.name}</h3><span class="text-[#b9774e] font-medium">Rp ${s.price}</span></div><p class="text-sm text-[#2b211a]/55">${s.desc}</p></div>
     </a>`).join('');
 
+  $('gallerySlides').innerHTML = CONTENT.gallery.map(src=>`
+    <div class="swiper-slide"><div class="photo rounded-3xl overflow-hidden aspect-[16/10]"><img src="${src}" loading="lazy" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`).join('');
+
   $('menuList').innerHTML = CONTENT.menu.map(g=>`
-    <div>
+    <div data-aos="fade-up">
       <h3 class="serif text-2xl text-[#b9774e] mb-6">${g.cat}</h3>
       <div class="space-y-5">
         ${g.items.map(it=>`<a href="${orderUrl(it.name)}" target="_blank" class="flex items-baseline gap-4 group">
@@ -162,9 +208,37 @@ const CONTENT = {
       </div>
     </div>`).join('');
 
-  // gentle scroll reveal
-  const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }), {threshold:.15});
-  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  // ---- Animations ----
+  // Scroll reveals
+  AOS.init({ duration:800, easing:'ease-out-cubic', once:true, offset:90 });
+
+  // Photo gallery carousel
+  try {
+    new Swiper('.gallerySwiper', {
+      slidesPerView:1.1, spaceBetween:16, loop:true, grabCursor:true,
+      autoplay:{ delay:3200, disableOnInteraction:false },
+      pagination:{ el:'.swiper-pagination', clickable:true },
+      breakpoints:{ 768:{ slidesPerView:2.2, spaceBetween:22 } }
+    });
+  } catch(e){}
+
+  // Smooth scrolling (Lenis) — graceful fallback to native
+  if (window.Lenis) {
+    const lenis = new Lenis({ duration:1.1, smoothWheel:true });
+    function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }
+    requestAnimationFrame(raf);
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', e=>{ const id=a.getAttribute('href'); if(id.length>1 && document.querySelector(id)){ e.preventDefault(); lenis.scrollTo(id, { offset:0 }); } });
+    });
+  } else {
+    document.documentElement.style.scrollBehavior = 'smooth';
+  }
+
+  // Nav solidifies after hero (works with or without Lenis)
+  const nav = $('nav');
+  const onScroll = () => nav.classList.toggle('solid', window.scrollY > 80);
+  window.addEventListener('scroll', onScroll, { passive:true });
+  onScroll();
 </script>
 </body>
 </html>
