@@ -83,6 +83,18 @@
   @keyframes introOut { to { opacity:0; visibility:hidden; transform:translateY(-100%); } }
   @keyframes iline { to { width:min(220px,42vw); } }
   @media (prefers-reduced-motion:reduce){ #intro { display:none; } }
+
+  /* custom cursor */
+  #cdot, #cring { display:none; }
+  @media (hover:hover) and (pointer:fine){
+    body { cursor:none; }
+    a, button, [data-magnetic], .langbtn, input, textarea, select, label, #agentGrid { cursor:none; }
+    #cdot { display:block; position:fixed; top:0; left:0; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:#eab308; pointer-events:none; z-index:59; }
+    #cring { display:block; position:fixed; top:0; left:0; width:34px; height:34px; margin:-17px 0 0 -17px; border-radius:50%; border:1.5px solid rgba(234,179,8,.55); pointer-events:none; z-index:59; transition:width .25s, height .25s, margin .25s, background-color .25s, border-color .25s; }
+    #cring.hot { width:56px; height:56px; margin:-28px 0 0 -28px; background:rgba(234,179,8,.12); border-color:rgba(234,179,8,.9); }
+  }
+  /* hide scrollbar on horizontal team strip */
+  .no-bar::-webkit-scrollbar { display:none; } .no-bar { -ms-overflow-style:none; scrollbar-width:none; }
 </style>
 </head>
 <body class="bg-[#08090c] text-[#f7f8f8]">
@@ -91,6 +103,8 @@
 <div id="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
 <div id="scroll-progress"></div>
 <div id="cursor-glow" aria-hidden="true"></div>
+<div id="cring" aria-hidden="true"></div>
+<div id="cdot" aria-hidden="true"></div>
 
 <!-- ============================================================= -->
 <!--  FIXED VISUALS (colours, emojis, images) — not language       -->
@@ -481,6 +495,9 @@ LANG.km.alacarte.steps = [
 LANG.en.alacarte.pay = "Easy, secure payment — DuitNow, KHQR, or card. Prices in USD; pay in your local currency too.";
 LANG.id.alacarte.pay = "Pembayaran mudah & aman — DuitNow, KHQR, atau kartu. Harga dalam USD; bisa bayar dengan mata uang lokal Anda.";
 LANG.km.alacarte.pay = "ការទូទាត់ងាយស្រួល & មានសុវត្ថិភាព — KHQR, DuitNow ឬកាត។ តម្លៃជា USD អាចបង់ជារូបិយប័ណ្ណក្នុងស្រុក។";
+LANG.en.stats = [ {n:7,s:"",l:"Specialists"}, {n:3,s:"",l:"Languages"}, {n:24,s:"h",l:"Avg. reply"}, {n:100,s:"%",l:"Done for you"} ];
+LANG.id.stats = [ {n:7,s:"",l:"Spesialis"}, {n:3,s:"",l:"Bahasa"}, {n:24,s:"h",l:"Rata-rata balas"}, {n:100,s:"%",l:"Beres untuk Anda"} ];
+LANG.km.stats = [ {n:7,s:"",l:"អ្នកជំនាញ"}, {n:3,s:"",l:"ភាសា"}, {n:24,s:"h",l:"ឆ្លើយតបជាមធ្យម"}, {n:100,s:"%",l:"ធ្វើជូនស្រេច"} ];
 LANG.en.why = { h:"Anyone can use AI. We use it like experts.", sub:"ChatGPT and template builders give you generic output. We give you a real team, real design, and real results.", items:[
   {t:"Brand-grade, not template", d:"Built on the design systems behind the world's biggest brands. Never generic AI slop."},
   {t:"Experts, not prompts", d:"A 7-specialist team who know what actually ranks, converts, and sells. You don't lift a finger or write a single prompt."},
@@ -586,7 +603,13 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
 <section id="team" class="px-6 md:px-12 py-16 max-w-6xl mx-auto">
   <h2 id="teamH" class="display text-4xl md:text-5xl font-bold tracking-tight text-center mb-3"></h2>
   <p id="teamSub" class="text-white/50 text-center mb-14"></p>
-  <div id="agentGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  <div id="agentGrid" class="no-bar flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory"></div>
+  <p class="text-center text-white/25 text-[11px] mt-4 tracking-[0.2em] uppercase">drag / swipe to meet the team →</p>
+</section>
+
+<!-- STATS -->
+<section class="px-6 md:px-12 py-14">
+  <div id="statsGrid" class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center"></div>
 </section>
 
 <!-- WHY US (vs generic AI) -->
@@ -835,6 +858,7 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
     $('gapFoot').textContent = t.gap_foot;
     $('teamH').textContent = t.team_h;
     $('teamSub').textContent = t.team_sub;
+    $('statsGrid').innerHTML = t.stats.map(s => `<div><div class="display text-4xl md:text-5xl font-bold text-[#eab308]"><span class="statnum" data-to="${s.n}" data-suf="${s.s}">${s.n}${s.s}</span></div><div class="text-sm text-white/50 mt-2">${s.l}</div></div>`).join('');
     // case study section removed for now — re-add when a real client is live
     $('finalH').textContent = t.final_h;
     $('finalSub').textContent = t.final_sub;
@@ -849,7 +873,7 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
     $('withList').innerHTML    = t.with.map(x => `<li class="flex gap-3"><span class="text-[#34d399]">✓</span> ${x}</li>`).join('');
 
     $('agentGrid').innerHTML = VISUAL.agents.map((a,i) => `
-      <div class="agent-card rounded-3xl p-6 bg-[#0f1115] border border-white/5 hover:border-white/15 hover:shadow-2xl hover:shadow-black/40 transition-all duration-200" style="--c:${a.c};--d:${(i*0.12).toFixed(2)}s">
+      <div class="agent-card snap-start shrink-0 w-[280px] sm:w-[320px] rounded-3xl p-6 bg-[#0f1115] border border-white/5 hover:border-white/15 hover:shadow-2xl hover:shadow-black/40 transition-all duration-200" style="--c:${a.c};--d:${(i*0.12).toFixed(2)}s">
         <div class="slot rounded-2xl aspect-square mb-5 glow" style="--c:${a.c}" onmouseenter="playWave(this)" onmouseleave="stopWave(this)">
           <img class="charimg" style="--delay:${(i*0.45).toFixed(2)}s;--dur:${(3.6+(i%3)*0.7).toFixed(2)}s" src="${a.img}" alt="${a.name}" onerror="this.style.display='none'" />
           <video class="wave" muted loop playsinline preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:3;opacity:0;transition:opacity .25s"><source src="${a.img.replace('.png','-wave.mp4')}" type="video/mp4"></video>
@@ -959,6 +983,35 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
     b.addEventListener('mousemove', e=>{ const r=b.getBoundingClientRect(); b.style.transform='translate('+(e.clientX-r.left-r.width/2)*0.3+'px,'+(e.clientY-r.top-r.height/2)*0.45+'px)'; });
     b.addEventListener('mouseleave', ()=> b.style.transform='');
   });
+
+  // Custom cursor — dot follows instantly, ring lags + grows over interactive elements
+  const dot=document.getElementById('cdot'), ring=document.getElementById('cring');
+  if (dot && ring && matchMedia('(hover:hover) and (pointer:fine)').matches){
+    let rx=innerWidth/2, ry=innerHeight/2, mx=rx, my=ry;
+    window.addEventListener('mousemove', e=>{ mx=e.clientX; my=e.clientY; dot.style.transform='translate('+mx+'px,'+my+'px)'; }, {passive:true});
+    (function ringRaf(){ rx+=(mx-rx)*0.2; ry+=(my-ry)*0.2; ring.style.transform='translate('+rx+'px,'+ry+'px)'; requestAnimationFrame(ringRaf); })();
+    document.querySelectorAll('a,button,[data-magnetic],.langbtn,input,textarea').forEach(el=>{
+      el.addEventListener('mouseenter', ()=> ring.classList.add('hot'));
+      el.addEventListener('mouseleave', ()=> ring.classList.remove('hot'));
+    });
+  }
+
+  // Count-up stats when they scroll into view
+  const stnums=document.querySelectorAll('.statnum');
+  if (stnums.length){
+    const sio=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ const el=e.target, to=+el.dataset.to, suf=el.dataset.suf||'', st=performance.now();
+      (function tick(now){ const p=Math.min((now-st)/1200,1); el.textContent=Math.round(to*(1-Math.pow(1-p,3)))+suf; if(p<1) requestAnimationFrame(tick); })(performance.now());
+      sio.unobserve(el); } }),{threshold:.4});
+    stnums.forEach(el=>sio.observe(el));
+  }
+
+  // Drag-to-scroll the horizontal team strip
+  const strip=document.getElementById('agentGrid');
+  if (strip){ let down=false,sx=0,sl=0;
+    strip.addEventListener('mousedown', e=>{ down=true; sx=e.pageX; sl=strip.scrollLeft; });
+    window.addEventListener('mouseup', ()=> down=false);
+    strip.addEventListener('mousemove', e=>{ if(!down) return; e.preventDefault(); strip.scrollLeft=sl-(e.pageX-sx); });
+  }
 })();
 </script>
 </body>
