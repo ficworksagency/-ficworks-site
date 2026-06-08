@@ -19,12 +19,12 @@
 </head>
 <body class="bg-white text-[#222222]">
 
-<!-- ↓ EDIT HERE: rooms, prices, photos, details ↓ -->
+<!-- — EDIT HERE: rooms, prices, photos, details — -->
 <script>
 const CONTENT = {
-  name:"Amara Ubud", tagline:"A boutique retreat in the heart of Bali.",
+  name:"Solara Resort", tagline:"An oceanfront escape, steps from the sand.",
   location:"Ubud, Bali", rating:"4.92", reviews:"184",
-  heroImg:"https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1920&auto=format&fit=crop",
+  heroImg:"assets/hotel/hero.png",
   whatsapp:"+62 812 0000 0000", address:"Jl. Raya Ubud, Gianyar, Bali",
   rooms:[
     { name:"Garden Suite", price:"1.850.000", desc:"King bed, private terrace over the koi garden.", img:"https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=900&auto=format&fit=crop" },
@@ -58,7 +58,7 @@ const CONTENT = {
       <span id="hrate"></span><span class="text-[#6a6a6a] font-normal" id="hrev"></span>
     </div>
   </div>
-  <div class="photo rounded-3xl overflow-hidden aspect-[16/9] md:aspect-[21/9]"><img id="hero" alt="" onerror="this.style.display='none'" /></div>
+  <div class="photo rounded-3xl overflow-hidden aspect-[16/9] md:aspect-[21/9]"><video id="hero" autoplay loop muted playsinline poster="assets/hotel/hero.png" class="w-full h-full object-cover"><source src="assets/hotel/hero.mp4" type="video/mp4" /></video></div>
   <p class="text-xl md:text-2xl text-[#222] mt-8 max-w-2xl font-medium" id="htag"></p>
 </section>
 
@@ -98,7 +98,7 @@ const CONTENT = {
   nm.textContent = fn.textContent = hn.textContent = CONTENT.name;
   hloc.textContent = CONTENT.location; htag.textContent = CONTENT.tagline;
   hrate.textContent = CONTENT.rating; hrev.textContent = " · " + CONTENT.reviews + " reviews";
-  hero.src = CONTENT.heroImg; baddr.textContent = faddr.textContent = CONTENT.address;
+  var _hh=$('hero'); if(_hh && _hh.tagName==='IMG') _hh.src = CONTENT.heroImg; baddr.textContent = faddr.textContent = CONTENT.address;
   bfrom.textContent = "From Rp " + CONTENT.rooms[0].price + " / night";
   navBook.href = book(""); const bb = $('bookBtn'); bb.href = book(""); bb.textContent = "Book on WhatsApp";
 

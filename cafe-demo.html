@@ -47,32 +47,32 @@
 <!-- ============================================================= -->
 <script>
 const CONTENT = {
-  cafeName: "Kopi Senja",
+  cafeName: "Amber Coffee",
   tagline: "Slow coffee, warm corners, golden afternoons.",
-  heroImg: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?q=80&w=1920&auto=format&fit=crop",
+  heroImg: "assets/cafe/cafe-hero-a.png",
   whatsapp: "+62 812 0000 0000",
-  address: "Jl. Kemang Raya No.12, Jakarta",
+  address: "12 Lantern Street, Old Town",
   hours: "Open daily · 8am – 10pm",
   about: "A neighbourhood coffee house in the heart of the city. Single-origin beans, roasted in small batches, poured with care. Pull up a chair and stay a while.",
   signatures: [
-    { name:"Kopi Susu Senja", price:"25.000", desc:"Our signature palm-sugar latte.", img:"https://images.unsplash.com/photo-1561882468-9110e03e0f78?q=80&w=900&auto=format&fit=crop" },
-    { name:"Es Kopi Aren",    price:"26.000", desc:"Iced espresso, aren sugar, fresh milk.", img:"https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?q=80&w=900&auto=format&fit=crop" }
+    { name:"Brown Sugar Latte", price:"4.80", desc:"Our signature palm-sugar latte.", img:"assets/cafe/cafe-susu.png" },
+    { name:"Iced Spanish Latte", price:"5.00", desc:"Iced espresso, condensed milk, a hint of caramel.", img:"assets/cafe/cafe-aren.png" }
   ],
   gallery: [
-    "https://images.unsplash.com/photo-1453614512568-c4024d13c247?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1442512595331-e89e73853f31?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1200&auto=format&fit=crop"
+    "assets/cafe/cafe-interior.png",
+    "assets/cafe/cafe-pastry.png",
+    "assets/cafe/cafe-hero-a.png",
+    "assets/cafe/cafe-aren.png",
+    "assets/cafe/cafe-susu.png"
   ],
   menu: [
     { cat:"Coffee", items:[
-      { name:"Kopi Tubruk", price:"15.000" }, { name:"Kopi Susu Senja", price:"25.000" },
-      { name:"Cappuccino", price:"28.000" }, { name:"Es Kopi Aren", price:"26.000" } ]},
+      { name:"Filter Coffee", price:"3.50" }, { name:"Brown Sugar Latte", price:"4.80" },
+      { name:"Cappuccino", price:"4.50" }, { name:"Iced Spanish Latte", price:"5.00" } ]},
     { cat:"Non-Coffee", items:[
-      { name:"Matcha Latte", price:"30.000" }, { name:"Cokelat Panas", price:"28.000" }, { name:"Es Teh Leci", price:"18.000" } ]},
+      { name:"Matcha Latte", price:"5.20" }, { name:"Hot Chocolate", price:"4.80" }, { name:"Iced Lychee Tea", price:"3.80" } ]},
     { cat:"Bites", items:[
-      { name:"Butter Croissant", price:"22.000" }, { name:"Pisang Goreng", price:"18.000" }, { name:"Roti Bakar Cokelat", price:"20.000" } ]}
+      { name:"Butter Croissant", price:"4.00" }, { name:"Banana Bread", price:"4.20" }, { name:"Chocolate Toast", price:"4.50" } ]}
   ]
 };
 </script>
@@ -91,10 +91,13 @@ const CONTENT = {
 
 <!-- HERO -->
 <section class="relative h-screen photo flex items-end overflow-hidden">
-  <img id="heroImg" alt="" onerror="this.style.display='none'" />
-  <div class="absolute inset-0 bg-gradient-to-t from-[#1c140e] via-[#1c140e]/35 to-[#1c140e]/30"></div>
+  <video id="heroVid" autoplay loop muted playsinline poster="assets/cafe/cafe-hero-a.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+    <source src="assets/cafe/cafe-pour.mp4" type="video/mp4" />
+  </video>
+  <div class="absolute inset-0 bg-gradient-to-t from-[#1c140e] via-[#1c140e]/15 to-transparent"></div>
+  <div class="absolute inset-0 bg-gradient-to-r from-[#1c140e]/40 to-transparent"></div>
   <div class="relative z-10 px-6 md:px-12 pb-24 max-w-2xl text-[#faf6f0]">
-    <p class="hero-anim uppercase tracking-[0.35em] text-[11px] text-[#e6b87f] mb-6" style="animation-delay:.1s">Coffee House · Jakarta</p>
+    <p class="hero-anim uppercase tracking-[0.35em] text-[11px] text-[#e6b87f] mb-6" style="animation-delay:.1s">Specialty Coffee House</p>
     <h1 id="heroName" class="hero-anim serif text-6xl md:text-8xl leading-[0.95] mb-6 font-medium" style="animation-delay:.25s"></h1>
     <p id="heroTag" class="hero-anim text-lg md:text-xl font-light text-[#faf6f0]/85 max-w-md" style="animation-delay:.45s"></p>
   </div>
@@ -175,10 +178,10 @@ const CONTENT = {
   $('about').textContent = CONTENT.about;
   $('visitAddr').textContent = $('footAddr').textContent = CONTENT.address;
   $('visitHours').textContent = CONTENT.hours;
-  $('heroImg').src = CONTENT.heroImg;
+  var _hi = $('heroImg'); if (_hi) _hi.src = CONTENT.heroImg;
   $('navOrder').href = orderUrl("");
   const ob = $('orderBtn'); ob.href = orderUrl(""); ob.innerHTML = 'Order on WhatsApp';
-  try { new QRCode($('qr'), { text:"https://kopisenja.example/menu", width:170, height:170, colorDark:"#2b211a", colorLight:"#faf6f0" }); } catch(e){}
+  try { new QRCode($('qr'), { text:"https://ambercoffee.example/menu", width:170, height:170, colorDark:"#2b211a", colorLight:"#faf6f0" }); } catch(e){}
 
   const featSvg = [
     '<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c4 3 4 9 0 18-4-9-4-15 0-18z"/></svg>',
@@ -191,7 +194,7 @@ const CONTENT = {
   $('signatures').innerHTML = CONTENT.signatures.map((s,i)=>`
     <a href="${orderUrl(s.name)}" target="_blank" data-aos="fade-up" data-aos-delay="${i*100}" class="group block bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
       <div class="photo h-56 overflow-hidden"><img src="${s.img}" loading="lazy" onerror="this.style.display='none'" class="group-hover:scale-105 transition duration-700"></div>
-      <div class="p-6"><div class="flex items-baseline justify-between mb-1"><h3 class="serif text-2xl text-[#2b211a]">${s.name}</h3><span class="text-[#b9774e] font-medium">Rp ${s.price}</span></div><p class="text-sm text-[#2b211a]/55">${s.desc}</p></div>
+      <div class="p-6"><div class="flex items-baseline justify-between mb-1"><h3 class="serif text-2xl text-[#2b211a]">${s.name}</h3><span class="text-[#b9774e] font-medium">$${s.price}</span></div><p class="text-sm text-[#2b211a]/55">${s.desc}</p></div>
     </a>`).join('');
 
   $('gallerySlides').innerHTML = CONTENT.gallery.map(src=>`
@@ -204,7 +207,7 @@ const CONTENT = {
         ${g.items.map(it=>`<a href="${orderUrl(it.name)}" target="_blank" class="flex items-baseline gap-4 group">
           <span class="font-medium text-[#2b211a] group-hover:text-[#b9774e] transition">${it.name}</span>
           <span class="flex-1 border-b border-dotted border-[#2b211a]/20"></span>
-          <span class="text-[#6f4a2f] whitespace-nowrap">Rp ${it.price}</span></a>`).join('')}
+          <span class="text-[#6f4a2f] whitespace-nowrap">$${it.price}</span></a>`).join('')}
       </div>
     </div>`).join('');
 
