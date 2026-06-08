@@ -547,10 +547,12 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
     <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-[42rem] h-[42rem] rounded-full bg-[#eab308]/10 blur-[130px]"></div>
     <div class="absolute top-44 left-1/4 w-[26rem] h-[26rem] rounded-full bg-[#22d3ee]/10 blur-[130px]"></div>
   </div>
-  <p id="heroEyebrow" class="inline-block border border-white/15 rounded-full px-4 py-1.5 text-xs text-white/60 mb-8 backdrop-blur"></p>
-  <h1 id="heroH" class="shimmer display text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight mb-7"></h1>
-  <p id="heroSub" class="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-9 leading-relaxed"></p>
-  <div class="flex justify-center mb-12">
+  <!-- interactive 3D "AI constellation" — fills behind the headline, reacts to cursor, drag to spin -->
+  <canvas id="hero3d" class="absolute inset-0 w-full h-full" style="z-index:0;pointer-events:none" aria-hidden="true"></canvas>
+  <p id="heroEyebrow" class="relative z-10 inline-block border border-white/15 rounded-full px-4 py-1.5 text-xs text-white/60 mb-8 backdrop-blur"></p>
+  <h1 id="heroH" class="relative z-10 shimmer display text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight mb-7"></h1>
+  <p id="heroSub" class="relative z-10 text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-9 leading-relaxed"></p>
+  <div class="relative z-10 flex justify-center mb-12">
     <a href="#contact" id="heroCtaA" data-magnetic class="btn-shine inline-flex items-center gap-2 bg-[#eab308] text-[#0c1117] px-8 py-4 rounded-full text-sm font-bold hover:bg-[#f59e0b] transition shadow-xl shadow-[#eab308]/25"></a>
   </div>
   <div class="slot rounded-3xl border border-white/10 aspect-[16/9] max-w-5xl mx-auto glow ring-1 ring-white/10" style="--c:#eab308">
@@ -1052,6 +1054,141 @@ LANG.km.why = { h:"អ្នកណាក៏ប្រើ AI បាន។ យើ�
     window.addEventListener('mouseup', ()=>{ down=false; strip.classList.remove('grabbing'); });
     strip.addEventListener('mousemove', e=>{ if(!down) return; e.preventDefault(); strip.scrollLeft=sl-(e.pageX-sx); });
     strip.addEventListener('wheel', e=>{ if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){ strip.scrollLeft += e.deltaY; e.preventDefault(); } }, {passive:false});
+  }
+})();
+</script>
+
+<!-- ============ INTERACTIVE 3D CONSTELLATION (hero) ============ -->
+<style>
+  #exGrid{ perspective:1200px; }
+  #exGrid > a{ transform-style:preserve-3d; }
+  #hero3d{ touch-action:pan-y; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+(function(){
+  const canvas = document.getElementById('hero3d');
+  if(!canvas) return;
+  const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true, powerPreference:'high-performance' });
+  } catch(e){ return; }            // no WebGL → the blur-blob backdrop stays as fallback
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+  camera.position.z = 7.4;
+  const group  = new THREE.Group(); scene.add(group);
+
+  const isMobile = matchMedia('(max-width:768px)').matches;
+  const N = isMobile ? 95 : 155;
+  const R = 3.0;
+
+  const gold   = new THREE.Color('#eab308'),
+        warm   = new THREE.Color('#f59e0b'),
+        cyan   = new THREE.Color('#22d3ee'),
+        violet = new THREE.Color('#a78bfa'),
+        white  = new THREE.Color('#fff7e0');
+
+  const base = [], baseCol = [];
+  const pos = new Float32Array(N*3), colors = new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    const y = 1 - (i/(N-1))*2, r = Math.sqrt(Math.max(0,1-y*y));
+    const phi = i * Math.PI * (3 - Math.sqrt(5));
+    const v = new THREE.Vector3(Math.cos(phi)*r, y, Math.sin(phi)*r).multiplyScalar(R*(0.85+Math.random()*0.3));
+    base.push(v); pos[i*3]=v.x; pos[i*3+1]=v.y; pos[i*3+2]=v.z;
+    const c = (i%13===0) ? cyan.clone() : (i%19===0 ? violet.clone() : gold.clone().lerp(warm, Math.random()));
+    baseCol.push(c); colors[i*3]=c.r; colors[i*3+1]=c.g; colors[i*3+2]=c.b;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(colors,3));
+
+  // soft glowing dot sprite
+  const sc = document.createElement('canvas'); sc.width=sc.height=64;
+  const sx = sc.getContext('2d'), g = sx.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(.25,'rgba(255,240,200,.85)'); g.addColorStop(1,'rgba(255,255,255,0)');
+  sx.fillStyle=g; sx.fillRect(0,0,64,64);
+  const pmat = new THREE.PointsMaterial({ size:isMobile?0.30:0.24, map:new THREE.CanvasTexture(sc), vertexColors:true, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending });
+  group.add(new THREE.Points(geo, pmat));
+
+  // connect each node to its 3 nearest neighbours → constellation lines
+  const idx=[], maxD=R*0.95;
+  for(let i=0;i<N;i++){
+    const d=[]; for(let j=0;j<N;j++) if(i!==j) d.push([base[i].distanceTo(base[j]), j]);
+    d.sort((a,b)=>a[0]-b[0]);
+    for(let k=0;k<3;k++){ const [dist,j]=d[k]; if(dist<maxD && j>i) idx.push(i,j); }
+  }
+  const lpos=new Float32Array(idx.length*3);
+  for(let s=0;s<idx.length;s++){ const v=base[idx[s]]; lpos[s*3]=v.x; lpos[s*3+1]=v.y; lpos[s*3+2]=v.z; }
+  const lgeo=new THREE.BufferGeometry(); lgeo.setAttribute('position', new THREE.BufferAttribute(lpos,3));
+  const lmat=new THREE.LineBasicMaterial({ color:0xeab308, transparent:true, opacity:0.13, depthWrite:false, blending:THREE.AdditiveBlending });
+  group.add(new THREE.LineSegments(lgeo, lmat));
+
+  // ---- interaction ----
+  let mX=0, mY=0, tX=0, tY=0, yaw=0, spin=0, drag=false, lastX=0;
+  const hero = canvas.closest('section');
+  addEventListener('pointermove', e=>{
+    mX = (e.clientX/innerWidth)*2-1;
+    mY = -((e.clientY/innerHeight)*2-1);
+    if(drag){ spin += (e.clientX-lastX)*0.00018; lastX=e.clientX; }
+  }, {passive:true});
+  addEventListener('pointerdown', e=>{
+    if(!hero) return; const r=hero.getBoundingClientRect();
+    if(e.clientY<r.top || e.clientY>r.bottom) return;
+    if(e.target.closest('a,button,input,textarea,label,select,summary')) return;
+    drag=true; lastX=e.clientX;
+  });
+  addEventListener('pointerup', ()=> drag=false);
+
+  function resize(){
+    const w = canvas.clientWidth || hero.clientWidth, h = canvas.clientHeight || hero.clientHeight;
+    renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix();
+  }
+  resize(); addEventListener('resize', resize);
+
+  const colAttr = geo.attributes.color, p = new THREE.Vector3(), tmpC = new THREE.Color();
+  function frame(t){
+    if(!reduce){
+      yaw += 0.0016 + spin; spin *= 0.94;
+      tX += (mX-tX)*0.05; tY += (mY-tY)*0.05;
+      group.rotation.y = yaw + tX*0.5;
+      group.rotation.x = -tY*0.4;
+      group.scale.setScalar(1 + Math.sin(t*0.0006)*0.03);
+      group.updateMatrixWorld();
+      // brighten nodes nearest the cursor — the "alive" effect
+      for(let i=0;i<N;i++){
+        p.copy(base[i]).applyMatrix4(group.matrixWorld).project(camera);
+        const dist = Math.hypot(p.x-mX, p.y-mY);
+        const k = Math.max(0, 1 - dist/0.45);
+        tmpC.copy(baseCol[i]).lerp(white, k*k*0.9);
+        colAttr.setXYZ(i, tmpC.r, tmpC.g, tmpC.b);
+      }
+      colAttr.needsUpdate = true;
+      lmat.opacity = 0.10 + (Math.sin(t*0.0009)*0.5+0.5)*0.07;
+    }
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // ---- 3D tilt on the demo cards ----
+  const exg = document.getElementById('exGrid');
+  if(exg && matchMedia('(hover:hover) and (pointer:fine)').matches){
+    exg.addEventListener('pointermove', e=>{
+      const card = e.target.closest('a'); if(!card) return;
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX-r.left)/r.width - 0.5, py = (e.clientY-r.top)/r.height - 0.5;
+      card.style.transform = 'perspective(1000px) rotateY('+(px*11)+'deg) rotateX('+(-py*11)+'deg) translateZ(10px)';
+    });
+    exg.addEventListener('pointerout', e=>{
+      const card = e.target.closest('a');
+      if(card && !card.contains(e.relatedTarget)) card.style.transform='';
+    });
   }
 })();
 </script>
